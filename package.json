@@ -1,0 +1,28 @@
+{
+  "name": "mqtt_api_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "client": "cd mqtt_client && yarn start",
+    "server": "nodemon server.js",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aedes": "^0.40.1",
+    "moment": "^2.24.0",
+    "mqtt": "^3.0.0",
+    "node-hue-api": "^4.0.5",
+    "save": "^2.4.0",
+    "tplink-smarthome-api": "^2.0.0",
+    "uuid": "^3.4.0"
+  },
+  "devDependencies": {
+    "concurrently": "^5.1.0",
+    "nodemon": "^2.0.2"
+  }
+}

@@ -1,27 +1,25 @@
 const mqtt = require('mqtt'); //MQTT protocols
-const aedes = require('aedes')(); //MQTT Server Host
-const mqtt_server = require('net').createServer(aedes.handle);
-const mqttPort = 1883;
 
-const client  = mqtt.connect('mqtt://localhost', {
-    clientId: "MQTT_Host",
+const client  = mqtt.connect('mqtt://jack-gooding.com', {
+    port: 1883,
+    clientId: "Home Server",
 });
 
-let connectedClients = [];
 
 client.on('connect', () => {
   client.subscribe('device/connected');
-
+  client.subscribe('clients/connected');
   client.subscribe('keypad/button/pressed');
   client.subscribe('keypad/button/released');
+  client.subscribe('bedroom/blinds');
 
   client.subscribe('test/on');
   client.subscribe('test/num');
   client.subscribe('desk/lights');
 });
-
+/*
 mqtt_server.listen(mqttPort, function () {
-  console.log('MQTT mqtt started and listening on port ', mqttPort)
+  //console.log('MQTT mqtt started and listening on port ', mqttPort)
 })
 
 aedes.on('subscribe', function(topic , deliverfunc) {
@@ -46,6 +44,6 @@ aedes.on('clientDisconnect', function(device) {
   }
   console.log(connectedClients);
   client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
-});
+});*/
 
 module.exports = {client};

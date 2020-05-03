@@ -7,6 +7,8 @@ let buttonStates = {};
 // This function is triggered when a button is pressed AND released.
 // If pressed, starts a timer window with actions on expiry
 
+let timers = {};
+
 let indicatorLed = async function(direction) {
   if (direction === "Short") {
     ws2812B.shortIndicator();
@@ -30,6 +32,25 @@ function checkLength(arr, count) {
   }
   return i;
 }
+
+async function clearTimers() {
+ let buttons = Object.keys(buttonStates);
+ buttons.forEach(function(button) {
+   let timers = Object.keys(buttonStates[button]);
+   timers.forEach(function(timer) {
+     if (timer != "undefined") {
+       if (typeof(buttonStates[button][timer]) == "object") {
+         if (buttonStates[button][timer]._repeat != null) {
+           clearInterval(buttonStates[button][timer]);
+         } else {
+           //No action needed, timeouts still need to expire gracefully 
+           //clearTimeout(buttonStates[button][timer]);
+         }
+       }
+     }
+   })
+ });
+};
 
 async function handlePresses(direction, buttonName, actions) {
 
@@ -58,7 +79,7 @@ async function handlePresses(direction, buttonName, actions) {
       button.shortPressTimeout = setTimeout(function() {
         console.log("Short Press");
         let i = checkLength(actions, button.count);
-        actions[i].shortPress();
+        actions[i].shortPress(button.count-1);
         button.count = 0;
       }, 300);
 
@@ -66,7 +87,7 @@ async function handlePresses(direction, buttonName, actions) {
     } else if (button.longPressTimeout._destroyed == true  && button.longerPressTimeout._destroyed == false) {
       console.log("Long Press");
       let i = checkLength(actions, button.count);
-      actions[i].longPress();
+      actions[i].longPress(button.count-1);
       button.count = 0;
     } else if (button.longerPressTimeout._destroyed == true) {
       button.count = 0;
@@ -96,9 +117,9 @@ async function handlePresses(direction, buttonName, actions) {
         console.log("Longer Press action");
         let i = checkLength(actions, button.count);
 
-        actions[i].longerPress();
+        actions[i].longerPress(button.count-1);
         //indicatorLed("Longer");
-      },200);
+      },400);
     }, 1000);
 
 
@@ -174,4 +195,5 @@ async function handlePresses(e,button) {
 
 module.exports = {
   handlePresses,
+  clearTimers,
 }

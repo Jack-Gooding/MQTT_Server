@@ -22,6 +22,7 @@ const mqtts_server = require('tls').createServer(options, aedes.handle);
 
 
 const client  = mqtt.connect('mqtt:/localhost', {
+    port: 1884,
     clientId: "MQTT_Host",
 });
 

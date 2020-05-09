@@ -30,69 +30,82 @@ let randomiseColours = function(all) {
     });
   } else {
 
-      ledStore.forEach(function(led) {
-        led.red = Math.floor(Math.random()*255);
-        led.green = Math.floor(Math.random()*255);
-        led.blue = Math.floor(Math.random()*255);
-      });
+    ledStore.forEach(function(led) {
+      led.red = Math.floor(Math.random()*255);
+      led.green = Math.floor(Math.random()*255);
+      led.blue = Math.floor(Math.random()*255);
+    });
 
   };
-  let leds = ledStore;
+  let leds = [...ledStore];
+  console.log(ledStore);
   leds = JSON.stringify({leds});
+  console.log(leds);
   client.publish('keypad/leds', leds);
 };
 
 let allOff = function() {
-      ledStore.forEach(function(led) {
-        led.red = 0;
-        led.green = 0;
-        led.blue = 0;
-      });
+    ledStore.forEach(function(led) {
+      led.red = 0;
+      led.green = 0;
+      led.blue = 0;
+    });
 
-    let leds = ledStore;
+    let leds = [...ledStore];
     leds = JSON.stringify({leds});
     client.publish('keypad/leds', leds);
 };
 
-let shortIndicator = function() {
-  let leds = ledStore;
-      leds[0].red = 0;
-      leds[0].green = 254;
-      leds[0].blue = 0;
-      leds = JSON.stringify({leds});
-      client.publish('keypad/leds', leds);
+let shortIndicator = async function() {
+
+  leds = JSON.stringify({leds: [{red: 0, blue: 254, green: 254}]});
+  client.publish('keypad/leds', leds);
 };
 
-let longIndicator = function() {
-  let leds = ledStore;
-      leds[0].red = 150;
-      leds[0].green = 254;
-      leds[0].blue = 0;
-      leds = JSON.stringify({leds});
-      client.publish('keypad/leds', leds);
+let longIndicator = async function() {
+
+  leds = JSON.stringify({leds: [{red: 0, blue: 0, green: 0},{red: 0, blue: 254, green: 254}]});
+  client.publish('keypad/leds', leds);
 };
 
-let longerIndicator = function() {
-  let leds = ledStore;
-      leds[0].red = 150;
-      leds[0].green = 254;
-      leds[0].blue = 100;
-      leds = JSON.stringify({leds});
-      client.publish('keypad/leds', leds);
+let longerIndicator = async function() {
+
+  leds = JSON.stringify({leds: [{red: 0, blue: 0, green: 0},{red: 0, blue: 0, green: 0},{red: 0, blue: 254, green: 254}]});
+  client.publish('keypad/leds', leds);
 };
 
-let releaseIndicator = function() {
-  let leds = ledStore;
-    //return JSON.stringify({leds});
+let layerIndidicator = async function() {
+    let leds = [];
+
+    ledStore.forEach((led) => {
+      leds.push({
+        red : 254,
+        green: 254,
+        blue: 254,
+      });
+    });
+
+    leds = JSON.stringify({leds});
+    console.log(ledStore);
+    console.log(leds);
+    client.publish('keypad/leds', leds);
+};
+
+let releaseIndicator = async function() {
+  let leds = [...ledStore];
   leds = JSON.stringify({leds});
+  console.log(ledStore);
+  console.log(leds);
   client.publish('keypad/leds', leds);
 };
 
 module.exports = {
   randomiseColours,
   allOff,
+  ledStore,
   shortIndicator,
   longIndicator,
   longerIndicator,
   releaseIndicator,
+  layerIndidicator,
 };

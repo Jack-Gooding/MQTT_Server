@@ -43,7 +43,7 @@ async function clearTimers() {
          if (buttonStates[button][timer]._repeat != null) {
            clearInterval(buttonStates[button][timer]);
          } else {
-           //No action needed, timeouts still need to expire gracefully 
+           //No action needed, timeouts still need to expire gracefully
            //clearTimeout(buttonStates[button][timer]);
          }
        }
@@ -52,7 +52,7 @@ async function clearTimers() {
  });
 };
 
-async function handlePresses(direction, buttonName, actions) {
+function handlePresses(direction, buttonName, actions) {
 
   let button = buttonStates[buttonName];
   //if button doesn't exist in buttonStates, create it.
@@ -81,6 +81,7 @@ async function handlePresses(direction, buttonName, actions) {
         let i = checkLength(actions, button.count);
         actions[i].shortPress(button.count-1);
         button.count = 0;
+        indicatorLed("Released");
       }, 300);
 
 
@@ -89,17 +90,18 @@ async function handlePresses(direction, buttonName, actions) {
       let i = checkLength(actions, button.count);
       actions[i].longPress(button.count-1);
       button.count = 0;
+      indicatorLed("Released");
     } else if (button.longerPressTimeout._destroyed == true) {
       button.count = 0;
+      indicatorLed("Released");
     };
 
-    //indicatorLed("Released");
     clearTimeout(button.longPressTimeout);
     clearTimeout(button.longerPressTimeout);
     clearInterval(button.longerPressInterval);
   //key was pressed
   } else {
-    //indicatorLed("Short");
+    indicatorLed("Short");
 
     //mqtt.client.publish('keypad/leds',JSON.stringify({leds:[{red:0,green:254,blue:0},{red:0,green:0,blue:0},{red:0,green:0,blue:0},]}));
 
@@ -109,18 +111,18 @@ async function handlePresses(direction, buttonName, actions) {
 
     button.longPressTimeout = setTimeout(function() {
       console.log("Long Press Timeout Ready")
-      //indicatorLed("Long");
+      indicatorLed("Long");
     }, 500);
 
     button.longerPressTimeout = setTimeout(function() {
+        indicatorLed("Longer");
       button.longerPressInterval = setInterval(function() {
         console.log("Longer Press action");
         let i = checkLength(actions, button.count);
 
         actions[i].longerPress(button.count-1);
-        //indicatorLed("Longer");
       },400);
-    }, 1000);
+    }, 1200);
 
 
   }

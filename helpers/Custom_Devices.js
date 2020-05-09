@@ -8,9 +8,15 @@ let setScreenLights = function(state) {
     client.publish('desk/lights', state);
 };
 
+let setRPiLights = function(state) {
+    screenLights = state;
+    client.publish('rpi/ledString', state);
+};
+
 
 
 module.exports = {
   screenLights,
   setScreenLights,
+  setRPiLights,
 }

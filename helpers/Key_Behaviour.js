@@ -3,7 +3,7 @@ const hueHelpers = require("./Philips_Hue");
 const tpLinkHelpers = require("./TPLink");
 const ws2812B = require("./WS2812B");
 const custom = require("./Custom_Devices");
-const blinds = require("./blinds");
+const blinds = require("./Blinds");
 
 
 const {client} = require("./MQTT");
@@ -56,6 +56,11 @@ const switch_on = [
     longPress: function() {custom.setScreenLights("255")},
     longerPress: function() {custom.setScreenLights("255")}
   },
+  {
+    shortPress: function() {custom.setRPiLights("255")},
+    longPress: function() {custom.setRPiLights("255")},
+    longerPress: function() {custom.setRPiLights("255")}
+  },
 ]
 
 const switch_off = [
@@ -74,6 +79,11 @@ const switch_off = [
     longPress: function() {custom.setScreenLights("0")},
     longerPress: function() {custom.setScreenLights("0")}
   },
+  {
+    shortPress: function() {custom.setRPiLights("0")},
+    longPress: function() {custom.setRPiLights("0")},
+    longerPress: function() {custom.setRPiLights("0")}
+  },
 ];
 
 const switches_on = [
@@ -82,16 +92,19 @@ const switches_on = [
       tpLinkHelpers.toggle(0,true);
       tpLinkHelpers.toggle(1,true);
       custom.setScreenLights("255");
+      custom.setRPiLights("255");
     },
     longPress: function() {
       tpLinkHelpers.toggle(0,true);
       tpLinkHelpers.toggle(1,true);
       custom.setScreenLights("255");
+      custom.setRPiLights("255");
     },
     longerPress: function() {
       tpLinkHelpers.toggle(0,true);
       tpLinkHelpers.toggle(1,true);
       custom.setScreenLights("255");
+      custom.setRPiLights("255");
     },
   },
 ]
@@ -102,16 +115,19 @@ const switches_off = [
       tpLinkHelpers.toggle(0,false);
       tpLinkHelpers.toggle(1,false);
       custom.setScreenLights("0");
+      custom.setRPiLights("0");
     },
     longPress: function() {
       tpLinkHelpers.toggle(0,false);
       tpLinkHelpers.toggle(1,false);
       custom.setScreenLights("0");
+      custom.setRPiLights("0");
     },
     longerPress: function() {
       tpLinkHelpers.toggle(0,false);
       tpLinkHelpers.toggle(1,false);
       custom.setScreenLights("0");
+      custom.setRPiLights("0");
     },
   },
 ]

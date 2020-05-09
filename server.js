@@ -9,7 +9,7 @@ const blinds = require("./helpers/Blinds");
 const express_module = require('express');
 const express = express_module();
 const bodyParser = require('body-parser');
-const expressPort = 5000;
+const expressPort = 3254;
 
 const WebSocket = require('ws');
 
@@ -29,7 +29,7 @@ wss.on('connection', function connection(ws) {
 
 let moment = require('moment');
 
-client.on('message', (topic, msg) => {
+client.on('message', async (topic, msg) => {
   message = msg.toString('utf8');
 
 
@@ -44,10 +44,10 @@ client.on('message', (topic, msg) => {
 
   } else if (topic === 'keypad/button/pressed') {
     if (filterApplied) {
-      if (message == "button1") {
-        filterApplied = false;
-        console.log("Filter Off");
-        keyTracker.clearTimers();
+      if (message == "button2") {
+        client.publish("rpi/led", "off");
+      } else if (message == "button6") {
+        client.publish("rpi/led", "on");
       } else if (message == "button5") {
         keyTracker.handlePresses(true,message,keyBehaviours.lights_down);
       } else if (message == "button9") {
@@ -63,6 +63,8 @@ client.on('message', (topic, msg) => {
         filterApplied = true;
         console.log("Filter On");
         keyTracker.clearTimers();
+        ws2812B.layerIndidicator();
+        //ws2812B.randomiseColours();
         client.publish("bedroom/blinds", JSON.stringify({steps: 0, dir: "up"}));
       } else if (message == "button2") {
         client.publish("bedroom/blinds", JSON.stringify({steps: -60000, dir: "down"}));
@@ -92,6 +94,8 @@ client.on('message', (topic, msg) => {
         filterApplied = false;
         console.log("Filter Off");
         keyTracker.clearTimers();
+        ws2812B.releaseIndicator();
+        //ws2812B.randomiseColours();
       } else if (message == "button5") {
         keyTracker.handlePresses(false,message,keyBehaviours.lights_down);
       } else if (message == "button9") {
@@ -102,12 +106,7 @@ client.on('message', (topic, msg) => {
         keyTracker.handlePresses(false,message,keyBehaviours.switches_on);
       }
     } else {
-      if (message == "button1") {
-        filterApplied = false;
-        console.log("Filter Off");
-        keyTracker.clearTimers();
-
-      } else if (message == "button5") {
+      if (message == "button5") {
         keyTracker.handlePresses(false,message,keyBehaviours.light_down);
       } else if (message == "button9") {
         keyTracker.handlePresses(false,message,keyBehaviours.light_up);
@@ -119,18 +118,17 @@ client.on('message', (topic, msg) => {
         keyTracker.handlePresses(false,message,keyBehaviours.switch_on);
       }
     }
-  } else if (topic == 'test/on') {
-    console.log(message);
-    if (message == "on") {
+  } else if (topic === "rpi/motion") {
+    if (message == "detected") {
       ws2812B.randomiseColours();
-    } else if (message == "off") {
+    } else if (message == "clear") {
       ws2812B.allOff();
     }
-  } else if (topic == 'test/num') {
-    console.log(JSON.parse(message).value);
-    client.publish('desk/lights',JSON.stringify({value:JSON.parse(message).value}));
-  } else {
+  } else if (topic == 'test/on') {
 
+  } else if (topic == 'test/num') {
+
+  } else {
     console.log("unrecognised message: "+message)
   }
 });
@@ -139,7 +137,7 @@ setInterval(async function() {
   tpLinkHelpers.discoverPlugs();
   hueHelpers.prepareHue();
   client.publish('device/connected', "yay");
-},10000);
+},1000000);
 
 
 tpLinkHelpers.discoverPlugs();

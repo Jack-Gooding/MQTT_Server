@@ -56,6 +56,10 @@ client.on('message', async (topic, msg) => {
         keyTracker.handlePresses(true,message,keyBehaviours.switches_off);
       } else if (message == "button8") {
         keyTracker.handlePresses(true,message,keyBehaviours.switches_on);
+      } else if (message == "button3") {
+        client.publish("bedroom/blinds", JSON.stringify({steps: -60000, dir: "down"}));
+      } else if (message == "button7") {
+        client.publish("bedroom/blinds", JSON.stringify({steps: 60000, dir: "up"}));
       }
     } else {
 
@@ -67,9 +71,9 @@ client.on('message', async (topic, msg) => {
         //ws2812B.randomiseColours();
         client.publish("bedroom/blinds", JSON.stringify({steps: 0, dir: "up"}));
       } else if (message == "button2") {
-        client.publish("bedroom/blinds", JSON.stringify({steps: -60000, dir: "down"}));
+        keyTracker.handlePresses(true,message,keyBehaviours.keyboard_down);
       } else if (message == "button6") {
-        client.publish("bedroom/blinds", JSON.stringify({steps: 60000, dir: "up"}));
+        keyTracker.handlePresses(true,message,keyBehaviours.keyboard_up);
       } else if (message == "button3") {
         let x = client.publish("keypad/leds", ws2812B.allOff());
 
@@ -108,6 +112,10 @@ client.on('message', async (topic, msg) => {
     } else {
       if (message == "button5") {
         keyTracker.handlePresses(false,message,keyBehaviours.light_down);
+      } else if (message == "button2") {
+        keyTracker.handlePresses(false,message,keyBehaviours.keyboard_down);
+      } else if (message == "button6") {
+        keyTracker.handlePresses(false,message,keyBehaviours.keyboard_up);
       } else if (message == "button9") {
         keyTracker.handlePresses(false,message,keyBehaviours.light_up);
       } else if (message == "button4") {

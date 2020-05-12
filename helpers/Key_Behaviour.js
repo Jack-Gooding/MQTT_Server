@@ -157,6 +157,22 @@ const blinds_down = [
   },
 ]
 
+const keyboard_up = [
+  {
+    shortPress: function(count) {client.publish("keyboard/key","play")},
+    longPress: function(count) {client.publish("keyboard/key","next")},
+    longerPress: function(count) {client.publish("keyboard/key","vol_up")}
+  },
+]
+
+const keyboard_down = [
+  {
+    shortPress: function(count) {client.publish("keyboard/key","mute")},
+    longPress: function(count) {client.publish("keyboard/key","prev")},
+    longerPress: function(count) {client.publish("keyboard/key","vol_down")}
+  },
+]
+
 module.exports = {
   lights_up,
   lights_down,
@@ -169,4 +185,6 @@ module.exports = {
   leds,
   blinds_up,
   blinds_down,
+  keyboard_up,
+  keyboard_down,
 }

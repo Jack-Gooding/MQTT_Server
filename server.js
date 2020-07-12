@@ -132,6 +132,21 @@ client.on('message', async (topic, msg) => {
     } else if (message == "clear") {
       ws2812B.allOff();
     }
+  } else if (topic === "ifttt/home") {
+    if (message === "home") {
+      console.log("HOME, MOTION SENSOR OFF");
+      client.publish("rpi/led", "off");
+
+    } else if (message === "away") {
+      client.publish("rpi/led", "on");
+      hueHelpers.toggleLights(false);
+      tpLinkHelpers.toggle(0,false);
+      tpLinkHelpers.toggle(1,false);
+      custom.setScreenLights("0");
+      custom.setRPiLights("0");
+
+      console.log("AWAY FROM HOME, MOTION SENSOR ON");
+    }
   } else if (topic == 'test/on') {
 
   } else if (topic == 'test/num') {

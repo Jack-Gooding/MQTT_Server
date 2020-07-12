@@ -17,7 +17,7 @@ client.on('connect', () => {
   client.subscribe('test/num');
   client.subscribe('desk/lights');
 
-  client.subscribe('rpi/motion')
+  client.subscribe('rpi/motion');
 });
 /*
 mqtt_server.listen(mqttPort, function () {

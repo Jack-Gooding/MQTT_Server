@@ -30,6 +30,7 @@ prepareHue = async () => {
   return lights;
 }
 
+prepareHue();
 
 
 async function randomiseLights(lightId) {

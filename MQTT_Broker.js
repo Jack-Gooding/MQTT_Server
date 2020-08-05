@@ -5,8 +5,10 @@
 const mqtt = require('mqtt'); //MQTT protocols
 const aedes = require('aedes')(); //MQTT Server Host
 const fs = require('fs'); //required for reading SSL/TLS certs.
+const express = require('express'); //Not needed but copying working version.
+const server = express();
 
-//const mqtt_server = require('net').createServer(aedes.handle);
+// const mqtt_server = require('net').createServer(aedes.handle);
 
 //Key Certs should be used.
 const options = {
@@ -16,14 +18,16 @@ const options = {
 
 const mqttPort = 1883;
 const mqttsPort = 8883;
+const expressPort = 3256;
 
 let connectedClients = [];
 
 const mqtts_server = require('tls').createServer(options, aedes.handle);
+const mqtt_server = require('net').createServer(aedes.handle);
 
 
-const client  = mqtt.connect('mqtt:/localhost', {
-    clientId: "MQTT_Host",
+const client  = mqtt.connect('mqtt://jack-gooding.com', {
+    clientId: "MQTT_Broker",
 });
 
 client.on('connect', async () => {
@@ -37,14 +41,19 @@ client.on('message', async (topic, msg) => {
   };
 });
 
+/*
 mqtts_server.listen(mqttsPort, async function () {
-  console.log('MQTT client started and listening on port ', mqttsPort);
+  console.log('MQTTs client started and listening on port ', mqttsPort);
 })
+*/
+mqtt_server.listen(mqttPort, async function () {
+  console.log('MQTT client started and listening on port ', mqttsPort);
+});
 
 aedes.on('subscribe', async function(topic , deliverfunc) {
   console.log("Successful Subscription: ");
   console.log(topic);
-  client.publish('subscription/topic',topic);
+  client.publish('subscription/topic',topic); //This is commented out in working v.
 });
 
 aedes.on('clientReady', async function(device) {
@@ -73,4 +82,12 @@ aedes.on('clientDisconnect', async function(device) {
   }
   console.log(connectedClients);
   client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
+});
+
+server.listen(expressPort, async () => {
+  console.log("Express server listening on port " +expressPort);
+});
+
+server.get("/", async (req, res) => {
+  res.send("Test Complete, Broker Activated!");
 });

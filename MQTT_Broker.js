@@ -9,10 +9,10 @@ const fs = require('fs'); //required for reading SSL/TLS certs.
 //const mqtt_server = require('net').createServer(aedes.handle);
 
 //Key Certs should be used.
-// const options = {
+const options = {
 //   key: fs.readFileSync('YOUR_PRIVATE_KEY_FILE.pem'),
 //   cert: fs.readFileSync('YOUR_PUBLIC_CERT_FILE.pem')
-// }
+};
 
 const mqttPort = 1883;
 const mqttsPort = 8883;

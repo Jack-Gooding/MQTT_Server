@@ -1,10 +1,13 @@
-const {client} = require("./helpers/MQTT");
+const {client, mqttConnect} = require("./helpers/MQTT");
+mqttConnect();
+
 const hueHelpers = require("./helpers/Philips_Hue");
 const tpLinkHelpers = require("./helpers/TPLink");
 const keyTracker = require("./helpers/Key_Tracker");
 const keyBehaviours = require("./helpers/Key_Behaviour");
 const ws2812B = require("./helpers/WS2812B");
 const blinds = require("./helpers/Blinds");
+const custom = require("./helpers/Custom_Devices");
 
 const express_module = require('express');
 const express = express_module();
@@ -144,7 +147,6 @@ client.on('message', async (topic, msg) => {
       tpLinkHelpers.toggle(1,false);
       custom.setScreenLights("0");
       custom.setRPiLights("0");
-
       console.log("AWAY FROM HOME, MOTION SENSOR ON");
     }
   } else if (topic == 'test/on') {
@@ -159,10 +161,7 @@ client.on('message', async (topic, msg) => {
 setInterval(async function() {
   tpLinkHelpers.discoverPlugs();
   hueHelpers.prepareHue();
-  client.publish('device/connected', "yay");
-},1000000);
-
-
+},10000);
 tpLinkHelpers.discoverPlugs();
 hueHelpers.prepareHue();
 
@@ -179,22 +178,22 @@ express.use((req, res, next) => {
     next();
 });
 
-express.listen(expressPort, () => {
+express.listen(expressPort, async () => {
   console.log("Express server listening on port: " + expressPort);
 });
 
 
-express.get("/", (req, res) => {
+express.get("/", async (req, res) => {
   res.status(200);
   res.send("Thanks, nothing here yet!");
 });
 
-express.get("/api/hue", (req,res) => {
+express.get("/api/hue", async (req,res) => {
   res.send(hueHelpers.lights)
 })
 
 
-setTimeout(function() {
+setTimeout( async function() {
   console.log("sending ON");
   client.publish("device/on", "on");
 },2000);

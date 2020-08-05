@@ -47,7 +47,7 @@ const discoverPlugs = async function() {
 console.log(`Found ${plugs.length} plugs: ${plugs.map(function(plug) {return `${plug.name}`})}`);
 };
 
-discoverPlugs();
+// discoverPlugs();
 
 module.exports = {
   plugs,

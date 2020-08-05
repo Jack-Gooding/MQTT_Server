@@ -8,10 +8,11 @@ const fs = require('fs'); //required for reading SSL/TLS certs.
 
 //const mqtt_server = require('net').createServer(aedes.handle);
 
-const options = {
-  key: fs.readFileSync('YOUR_PRIVATE_KEY_FILE.pem'),
-  cert: fs.readFileSync('YOUR_PUBLIC_CERT_FILE.pem')
-}
+//Key Certs should be used.
+// const options = {
+//   key: fs.readFileSync('YOUR_PRIVATE_KEY_FILE.pem'),
+//   cert: fs.readFileSync('YOUR_PUBLIC_CERT_FILE.pem')
+// }
 
 const mqttPort = 1883;
 const mqttsPort = 8883;
@@ -22,40 +23,47 @@ const mqtts_server = require('tls').createServer(options, aedes.handle);
 
 
 const client  = mqtt.connect('mqtt:/localhost', {
-    port: 1884,
     clientId: "MQTT_Host",
 });
 
-client.on('connect', () => {
+client.on('connect', async () => {
   client.subscribe('devices/request');
-
 });
 
-client.on('message', (topic, msg) => {
+client.on('message', async (topic, msg) => {
   message = msg.toString('utf8');
   if (topic === 'devices/request') {
     client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
   };
 });
 
-mqtts_server.listen(mqttsPort, function () {
-  console.log('MQTT client started and listening on port ', mqttsPort)
+mqtts_server.listen(mqttsPort, async function () {
+  console.log('MQTT client started and listening on port ', mqttsPort);
 })
 
-aedes.on('subscribe', function(topic , deliverfunc) {
+aedes.on('subscribe', async function(topic , deliverfunc) {
   console.log("Successful Subscription: ");
   console.log(topic);
   client.publish('subscription/topic',topic);
 });
 
-aedes.on('clientReady', function(device) {
+aedes.on('clientReady', async function(device) {
   console.log(`Successful Connection: ${device.id}`);
   console.log(`Total Connections: ${aedes.connectedClients}`);
   connectedClients.push(device.id);
+  console.log(connectedClients);
   client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
 });
 
-aedes.on('clientDisconnect', function(device) {
+aedes.on('publish', async function(packet, client) {
+  console.log('Something Published:');
+  console.log(`Packet:`);
+  console.log(packet);
+  console.log(`Client:`);
+  console.log(client);
+});
+
+aedes.on('clientDisconnect', async function(device) {
   console.log(`Client Disconnected: ${device.id}`);
   console.log(`Total Connections: ${aedes.connectedClients}`);
   for (let i = connectedClients.length-1; i >= 0; i--) {

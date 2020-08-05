@@ -6,6 +6,8 @@ const client  = mqtt.connect('mqtt://jack-gooding.com', {
 });
 
 
+
+
 client.on('connect', () => {
   client.subscribe('device/connected');
   client.subscribe('clients/connected');
@@ -18,6 +20,8 @@ client.on('connect', () => {
   client.subscribe('desk/lights');
 
   client.subscribe('rpi/motion');
+
+  client.subscribe('ifttt/home');
 });
 /*
 mqtt_server.listen(mqttPort, function () {

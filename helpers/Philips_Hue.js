@@ -6,6 +6,12 @@ let hueBridgeLocation;
 let hueBridge;
 let lights = [];
 
+let disco;
+let discoActive = false;
+
+let rainbowInterval;
+let rainbowActive = false;
+
 const username = "8FNEwdPyoc9eVRxP7ukCnf4QFowMK2aoHOmBuJdi";
 
 async function discoverBridge() {
@@ -30,15 +36,15 @@ prepareHue = async () => {
   return lights;
 }
 
-prepareHue();
+//prepareHue();
 
 
 async function randomiseLights(lightId) {
   console.log("randomiseLights");
   //console.log(hueApi);
+  let changes = [];
   if (lights) {
     //console.log(hueApi);
-
     //console.log(lights);
     let promises = [];
     let state;
@@ -61,7 +67,20 @@ async function randomiseLights(lightId) {
 
         let light = lights[i];
         if (light._data.type === "Extended color light") {
-          state = new LightState().transition(0).hue(Math.random()*65535).sat(Math.random(254/2)+(254/2)).on();
+
+          let hue = Math.round(Math.random()*360);
+          let sat = 100;
+          let lightness = 50;
+          let change = {
+            name: light._data.name,
+            color: {
+              hue: hue,
+              sat: sat,
+              lightness: lightness,
+            },
+          };
+          state = new LightState().transition(0).hsl(hue,sat,lightness).on();
+          changes.push(change);
         } else {
           state = new LightState().transition(0).on();
         }
@@ -69,13 +88,129 @@ async function randomiseLights(lightId) {
       };
     };
     let promise = await Promise.all(promises);
+    console.log(`Randomise Promise: `);
     console.log(promise);
+    console.log(changes);
+    return changes;
     //console.log(hueApi.lights.getAll());
   } else {
     await prepareHue();
     randomiseLights();
   };
 };
+
+async function rainbowLoop(transition = 4) {
+  if (lights) {
+    if (!rainbowActive) {
+      rainbowInterval = setInterval(async function() {
+        console.log(`Starting Lights: Rainbow mode!`);
+        let promises = [];
+
+          for (let i = 0; i < lights.length; i++ ) {
+
+            let light = lights[i];
+            if (light._data.type === "Extended color light") {
+              let change = {
+                hue: 65534/2,
+                name: light._data.name,
+              };
+              state = new LightState().transition(transition*1000).hue_inc(change.hue).sat(254).on();
+              promises.push(hueBridge.lights.setLightState(light._data.id, state));
+            }
+          };
+
+        let promise = await Promise.all(promises);
+
+      }, transition*1000);
+    } else {
+      clearInterval(rainbowInterval);
+    }
+    rainbowActive = !rainbowActive;
+    return rainbowActive;
+  } else {
+    await prepareHue();
+    return rainbowLoop();
+  }
+};
+
+async function discoLights(transition = 2) {
+
+  if (lights) {
+    if (!discoActive) {
+      console.log(`Disco request received.`);
+      disco = setInterval(async function() {
+        console.log(`Randomising Lights: Disco mode!`);
+        let promises = [];
+
+          for (let i = 0; i < lights.length; i++ ) {
+
+            let light = lights[i];
+            if (light._data.type === "Extended color light") {
+              let change = {
+                hue: Math.random()*65534,
+                name: light._data.name,
+              };
+              state = new LightState().transition(transition*1000).hue(change.hue).sat(254).on();
+              promises.push(hueBridge.lights.setLightState(light._data.id, state));
+            } else {
+              //Do nothing because you might want a dim disco
+              // state = new LightState().on().transition(transition*1000).brightness(Math.random()*30+70);
+
+            };
+          };
+
+        let promise = await Promise.all(promises);
+
+      }, transition*1000);
+    } else {
+      clearInterval(disco);
+    }
+    discoActive = !discoActive;
+    return discoActive;
+  } else {
+     await prepareHue();
+     return discoLights();
+  };
+};
+
+async function getLightStates(lightId) {
+  let states = [];
+  if (lightId != null) {
+
+    let lightState = await hueBridge.lights.getLightState(lightId);
+    states.push(lightState);
+
+  } else {
+
+    for (let i = 0; i < lights.length; i++) {
+      let light = lights[i];
+
+      let lightState = await hueBridge.lights.getLightState(light._data.id);
+
+      let stateObj = {
+        name: light._data.name,
+        id: light._data.id,
+        type: light._data.type,
+        on: lightState.on,
+        reachable: lightState.reachable,
+        color: {
+          bri: lightState.bri,
+        },
+      }
+
+      if (light._data.type === "Extended color light") {
+
+        stateObj.color.hue = lightState.hue;
+        stateObj.color.sat = lightState.sat;
+
+      };
+
+      states.push(stateObj);
+    }
+  }
+  console.log(states);
+  return states;
+}
 
 
 async function toggleLights(intended, lightId) {
@@ -187,4 +322,7 @@ module.exports = {
   randomiseLights,
   toggleLights,
   changeBrightness,
+  discoLights,
+  rainbowLoop,
+  getLightStates,
 }

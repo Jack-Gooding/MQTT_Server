@@ -1,11 +1,11 @@
 const mqtt = require('mqtt'); //MQTT protocols
-
+const blinds = require('./helpers/Blinds.js');
 const client  = mqtt.connect('mqtt://jack-gooding.com', {
     port: 1883,
     clientId: "Home Server",
 });
 
-client.on('connect', () => {
+client.on('connect', async () => {
   client.subscribe('device/connected');
   client.subscribe('clients/connected');
   client.subscribe('keypad/button/pressed');
@@ -19,6 +19,8 @@ client.on('connect', () => {
   client.subscribe('rpi/motion');
 
   client.subscribe('ifttt/home');
+  let package = await blinds.setPosition("60000", "down");
+  client.publish('bedroom/blinds', package);
 });
 
 client.on('message', async (topic, msg) => {

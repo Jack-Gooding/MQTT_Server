@@ -17,7 +17,7 @@ let ledStore = [{
 
 
 
-let randomiseColours = function(all) {
+let randomiseColours = async function(all) {
   if (all) {
     let red = Math.floor(Math.random()*255);
     let green = Math.floor(Math.random()*255);
@@ -44,7 +44,7 @@ let randomiseColours = function(all) {
   client.publish('keypad/leds', leds);
 };
 
-let allOff = function() {
+let allOff = async function() {
     ledStore.forEach(function(led) {
       led.red = 0;
       led.green = 0;
@@ -86,16 +86,16 @@ let layerIndidicator = async function() {
     });
 
     leds = JSON.stringify({leds});
-    console.log(ledStore);
-    console.log(leds);
+    // console.log(ledStore);
+    // console.log(leds);
     client.publish('keypad/leds', leds);
 };
 
 let releaseIndicator = async function() {
   let leds = [...ledStore];
   leds = JSON.stringify({leds});
-  console.log(ledStore);
-  console.log(leds);
+  // console.log(ledStore);
+  // console.log(leds);
   client.publish('keypad/leds', leds);
 };
 

@@ -12,8 +12,8 @@ const server = express();
 
 //Key Certs should be used.
 const options = {
-//   key: fs.readFileSync('YOUR_PRIVATE_KEY_FILE.pem'),
-//   cert: fs.readFileSync('YOUR_PUBLIC_CERT_FILE.pem')
+  // key: fs.readFileSync('YOUR_PRIVATE_KEY_FILE.pem'),
+  // cert: fs.readFileSync('YOUR_PUBLIC_CERT_FILE.pem')
 };
 
 const mqttPort = 1883;
@@ -47,7 +47,15 @@ mqtts_server.listen(mqttsPort, async function () {
 })
 */
 mqtt_server.listen(mqttPort, async function () {
-  console.log('MQTT client started and listening on port ', mqttsPort);
+  console.log('MQTT client started and listening on port ', mqttPort);
+});
+
+mqtts_server.listen(mqttsPort, async function () {
+  console.log('MQTTs client started and listening on port ', mqttsPort);
+});
+
+aedes.on('client', async function(client) {
+  console.log(client);
 });
 
 aedes.on('subscribe', async function(topic , deliverfunc) {

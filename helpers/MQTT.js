@@ -13,13 +13,13 @@ client.on('connect', () => {
   client.subscribe('clients/connected');
   client.subscribe('keypad/button/pressed');
   client.subscribe('keypad/button/released');
-  client.subscribe('bedroom/blinds');
+  // client.subscribe('bedroom/blinds');
 
-  client.subscribe('test/on');
-  client.subscribe('test/num');
-  client.subscribe('desk/lights');
+  // client.subscribe('test/on');
+  // client.subscribe('test/num');
+  // client.subscribe('desk/lights');
 
-  client.subscribe('rpi/motion');
+  // client.subscribe('rpi/motion');
 
   client.subscribe('ifttt/home');
 });

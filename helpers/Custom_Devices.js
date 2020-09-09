@@ -1,20 +1,20 @@
-// const {client} = require('./MQTT'); //MQTT protocols
+const {client} = require('./MQTT'); //MQTT protocols
 
 //State management for custom devices
 let screenLights = false;
 
 let rpiLights = false;
 
-let setScreenLights = function(state) {
+let setScreenLights = async (state) => {
     screenLights = state;
+    client.publish('desk/lights', state);
     return screenLights;
-    // client.publish('desk/lights', state);
 };
 
-let setRPiLights = function(state) {
+let setRPiLights = async (state) => {
     rpiLights = state;
+    client.publish('rpi/ledString', state);
     return rpiLights;
-    // client.publish('rpi/ledString', state);
 };
 
 

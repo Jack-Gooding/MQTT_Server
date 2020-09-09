@@ -257,8 +257,8 @@ discordClient.on('message', async (msg) => {
         client.publish("bedroom/blinds", package);
         msg.reply(`⚡ Moving blinds to position: ${words[2]}% ⚡`);
       } else {
-        let package = blinds.setPosition(100,up);
-        client.publish("bedroom/blinds", package);
+        // let package = blinds.setPosition(100,"up");
+        client.publish("bedroom/blinds", "0");
         msg.reply(`⚡ Incomplete command! Moving blinds to position: 100% ⚡`);
       }
     } else if (words[1] === 'fairyOff') {

@@ -21,7 +21,7 @@ let indicatorLed = async function(direction) {
   }
 }
 
-function checkLength(arr, count) {
+let checkLength = async function(arr, count) {
   let i;
   if (count > arr.length) {
     i = arr.length-1;
@@ -35,9 +35,9 @@ function checkLength(arr, count) {
 
 async function clearTimers() {
  let buttons = Object.keys(buttonStates);
- buttons.forEach(function(button) {
+ buttons.forEach(async function(button) {
    let timers = Object.keys(buttonStates[button]);
-   timers.forEach(function(timer) {
+   timers.forEach(async function(timer) {
      if (timer != "undefined") {
        if (typeof(buttonStates[button][timer]) == "object") {
          if (buttonStates[button][timer]._repeat != null) {
@@ -52,7 +52,7 @@ async function clearTimers() {
  });
 };
 
-function handlePresses(direction, buttonName, actions) {
+async function handlePresses(direction, buttonName, actions) {
 
   let button = buttonStates[buttonName];
   //if button doesn't exist in buttonStates, create it.
@@ -76,9 +76,12 @@ function handlePresses(direction, buttonName, actions) {
     if (button.longPressTimeout._destroyed == false) {
 
       //wait small delay for multi-presses
-      button.shortPressTimeout = setTimeout(function() {
+      button.shortPressTimeout = setTimeout( async () => {
         console.log("Short Press");
-        let i = checkLength(actions, button.count);
+        let i = await checkLength(actions, button.count);
+        console.log(actions);
+        console.log(actions[0]);
+        console.log(i);
         actions[i].shortPress(button.count-1);
         button.count = 0;
         indicatorLed("Released");
@@ -87,7 +90,7 @@ function handlePresses(direction, buttonName, actions) {
 
     } else if (button.longPressTimeout._destroyed == true  && button.longerPressTimeout._destroyed == false) {
       console.log("Long Press");
-      let i = checkLength(actions, button.count);
+      let i = await checkLength(actions, button.count);
       actions[i].longPress(button.count-1);
       button.count = 0;
       indicatorLed("Released");
@@ -109,16 +112,16 @@ function handlePresses(direction, buttonName, actions) {
     console.log(`${buttonName} pressed ${button.count} times!`);
     clearTimeout(button.shortPressTimeout);
 
-    button.longPressTimeout = setTimeout(function() {
+    button.longPressTimeout = setTimeout(async () => {
       console.log("Long Press Timeout Ready")
       indicatorLed("Long");
     }, 500);
 
-    button.longerPressTimeout = setTimeout(function() {
+    button.longerPressTimeout = setTimeout(async () => {
         indicatorLed("Longer");
-      button.longerPressInterval = setInterval(function() {
+      button.longerPressInterval = setInterval(async () => {
         console.log("Longer Press action");
-        let i = checkLength(actions, button.count);
+        let i = await checkLength(actions, button.count);
 
         actions[i].longerPress(button.count-1);
       },400);

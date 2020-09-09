@@ -1,5 +1,4 @@
 const {client, mqttConnect} = require("./helpers/MQTT");
-mqttConnect();
 
 const hueHelpers = require("./helpers/Philips_Hue");
 const tpLinkHelpers = require("./helpers/TPLink");
@@ -71,6 +70,7 @@ client.on('message', async (topic, msg) => {
         console.log("Filter On");
         keyTracker.clearTimers();
         ws2812B.layerIndidicator();
+        // custom.setScreenLights("" + Math.round(Math.random()));
         //ws2812B.randomiseColours();
         client.publish("bedroom/blinds", JSON.stringify({steps: 0, dir: "up"}));
       } else if (message == "button2") {
@@ -161,7 +161,7 @@ client.on('message', async (topic, msg) => {
 setInterval(async function() {
   tpLinkHelpers.discoverPlugs();
   hueHelpers.prepareHue();
-},10000);
+},60000);
 tpLinkHelpers.discoverPlugs();
 hueHelpers.prepareHue();
 

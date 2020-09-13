@@ -1,8 +1,14 @@
 const mqtt = require('mqtt'); //MQTT protocols
 
-const client  = mqtt.connect('mqtt://jack-gooding.com', {
-    port: 1883,
+require('dotenv').config();
+const username = process.env.USER;
+const password = process.env.PASS;
+
+const client  = mqtt.connect('mqtts://jack-gooding.com', {
+    port: 8883,
     clientId: "Home Server",
+    username: username,
+    password: password
 });
 
 

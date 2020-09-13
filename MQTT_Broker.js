@@ -8,12 +8,19 @@ const fs = require('fs'); //required for reading SSL/TLS certs.
 const express = require('express'); //Not needed but copying working version.
 const server = express();
 
+require('dotenv').config();
+const username = process.env.USER;
+const password = process.env.PASS;
+
+const ssl_key = process.env.KEY;
+const ssl_cert = process.env.CERT;
+
 // const mqtt_server = require('net').createServer(aedes.handle);
 
 //Key Certs should be used.
 const options = {
-  // key: fs.readFileSync('YOUR_PRIVATE_KEY_FILE.pem'),
-  // cert: fs.readFileSync('YOUR_PUBLIC_CERT_FILE.pem')
+  key: fs.readFileSync('ssl_key'),
+  cert: fs.readFileSync('ssl_cert'),
 };
 
 const mqttPort = 1883;
@@ -23,12 +30,16 @@ const expressPort = 3256;
 let connectedClients = [];
 
 const mqtts_server = require('tls').createServer(options, aedes.handle);
-const mqtt_server = require('net').createServer(aedes.handle);
+// const mqtt_server = require('net').createServer(aedes.handle);
 
 
-const client  = mqtt.connect('mqtt://jack-gooding.com', {
-    clientId: "MQTT_Broker",
+const client  = mqtt.connect('mqtts://jack-gooding.com', {
+    port: 8883,
+    clientId: "MQTT Broker",
+    username: username,
+    password: password
 });
+
 
 client.on('connect', async () => {
   client.subscribe('devices/request');
@@ -41,14 +52,24 @@ client.on('message', async (topic, msg) => {
   };
 });
 
-/*
-mqtts_server.listen(mqttsPort, async function () {
-  console.log('MQTTs client started and listening on port ', mqttsPort);
-})
-*/
-mqtt_server.listen(mqttPort, async function () {
-  console.log('MQTT client started and listening on port ', mqttPort);
-});
+// No longer using unsecured connection.
+// mqtt_server.listen(mqttPort, async function () {
+//   console.log('MQTT client started and listening on port ', mqttPort);
+// });
+
+
+aedes.authenticate = (client, c_username, c_password, callback)  => {
+  console.log("Authentication Attempted - ");
+  if (username === c_username && password === c_password) {
+    console.log("Authentication Success!");
+    callback(null, true);
+  } else {
+    console.log("Authentication Failure!");
+    let error = new Error('Auth error');
+    error.returnCode = 4;
+    callback(error, null);
+  }
+};
 
 mqtts_server.listen(mqttsPort, async function () {
   console.log('MQTTs client started and listening on port ', mqttsPort);
@@ -60,8 +81,8 @@ aedes.on('client', async function(client) {
 
 aedes.on('subscribe', async function(topic , deliverfunc) {
   console.log("Successful Subscription: ");
-  console.log(topic);
-  client.publish('subscription/topic',topic); //This is commented out in working v.
+  console.log(topic[0]);
+  client.publish('subscription/topic',topic[0]); //This is commented out in working v.
 });
 
 aedes.on('clientReady', async function(device) {

@@ -9,7 +9,7 @@ const express = require('express'); //Not needed but copying working version.
 const server = express();
 
 require('dotenv').config();
-const username = process.env.USER;
+const username = process.env.USERN;
 const password = process.env.PASS;
 
 const ssl_key = process.env.KEY;
@@ -19,8 +19,8 @@ const ssl_cert = process.env.CERT;
 
 //Key Certs should be used.
 const options = {
-  key: fs.readFileSync('ssl_key'),
-  cert: fs.readFileSync('ssl_cert'),
+  key: fs.readFileSync(ssl_key),
+  cert: fs.readFileSync(ssl_cert),
 };
 
 const mqttPort = 1883;
@@ -60,9 +60,11 @@ client.on('message', async (topic, msg) => {
 
 aedes.authenticate = (client, c_username, c_password, callback)  => {
   console.log("Authentication Attempted - ");
-  if (username === c_username && password === c_password) {
+  let client_username = client.parser.settings.username;
+  let client_password = client.parser.settings.password.toString();
+  if (username === client_username && password === client_password) {
     console.log("Authentication Success!");
-    callback(null, true);
+    callback(null, username);
   } else {
     console.log("Authentication Failure!");
     let error = new Error('Auth error');
@@ -76,13 +78,13 @@ mqtts_server.listen(mqttsPort, async function () {
 });
 
 aedes.on('client', async function(client) {
-  console.log(client);
+  // console.log(client);
 });
 
 aedes.on('subscribe', async function(topic , deliverfunc) {
   console.log("Successful Subscription: ");
   console.log(topic[0]);
-  client.publish('subscription/topic',topic[0]); //This is commented out in working v.
+  client.publish('subscription/topic',JSON.stringify(topic[0])); //This is commented out in working v.
 });
 
 aedes.on('clientReady', async function(device) {
@@ -96,9 +98,9 @@ aedes.on('clientReady', async function(device) {
 aedes.on('publish', async function(packet, client) {
   console.log('Something Published:');
   console.log(`Packet:`);
-  console.log(packet);
+  // console.log(packet);
   console.log(`Client:`);
-  console.log(client);
+  // console.log(client);
 });
 
 aedes.on('clientDisconnect', async function(device) {

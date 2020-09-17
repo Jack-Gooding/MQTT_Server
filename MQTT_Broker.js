@@ -64,11 +64,19 @@ aedes.authenticate = (client, c_username, c_password, callback)  => {
   let client_password;
   if (client.parser.settings.password != null) {
     //toString() is required because password is typically sent as a buffer.
-    let client_password = client.parser.settings.password.toString();
+    client_password = client.parser.settings.password.toString();
   }
   if (username === client_username && password === client_password && client_password != null) {
     console.log("Authentication Success!");
+
+    console.log(`Successful Connection: ${device.id}`);
+    console.log(`Total Connections: ${aedes.connectedClients}`);
+    connectedClients.push(device.id);
+    console.log(connectedClients);
+    client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
+
     callback(null, username);
+
   } else {
     console.log("Authentication Failure!");
     let error = new Error('Auth error');
@@ -92,19 +100,13 @@ aedes.on('subscribe', async function(topic , deliverfunc) {
 });
 
 aedes.on('clientReady', async function(device) {
-  console.log(`Successful Connection: ${device.id}`);
-  console.log(`Total Connections: ${aedes.connectedClients}`);
-  connectedClients.push(device.id);
-  console.log(connectedClients);
-  client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
+  //'clientReady' is before authentication, better to do it on successful auth.
 });
 
 aedes.on('publish', async function(packet, client) {
   console.log('Something Published:');
-  console.log(`Packet:`);
-  // console.log(packet);
-  console.log(`Client:`);
-  // console.log(client);
+  console.log(`Client: ${client.id}`);
+  console.log(`Topic: ${packet.topic} - Message: ${packet.payload}`);
 });
 
 aedes.on('clientDisconnect', async function(device) {

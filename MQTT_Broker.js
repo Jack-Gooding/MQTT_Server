@@ -61,8 +61,12 @@ client.on('message', async (topic, msg) => {
 aedes.authenticate = (client, c_username, c_password, callback)  => {
   console.log("Authentication Attempted - ");
   let client_username = client.parser.settings.username;
-  let client_password = client.parser.settings.password.toString();
-  if (username === client_username && password === client_password) {
+  let client_password;
+  if (client.parser.settings.password != null) {
+    //toString() is required because password is typically sent as a buffer.
+    let client_password = client.parser.settings.password.toString();
+  }
+  if (username === client_username && password === client_password && client_password != null) {
     console.log("Authentication Success!");
     callback(null, username);
   } else {

@@ -1,9 +1,15 @@
 const mqtt = require('mqtt'); //MQTT protocols
 const blinds = require('./helpers/Blinds.js');
+
+require('dotenv').config();
+const username = process.env.USERN;
+const password = process.env.PASS;
+
 const client  = mqtt.connect('mqtts://jack-gooding.com', {
     port: 8883,
     clientId: "Test Connect S",
-    username: "John",
+    username: username,
+    password: password,
 });
 
 client.on('connect', async () => {

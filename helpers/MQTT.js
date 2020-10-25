@@ -19,6 +19,9 @@ client.on('connect', () => {
   client.subscribe('clients/connected');
   client.subscribe('keypad/button/pressed');
   client.subscribe('keypad/button/released');
+
+  client.subscribe('lights/request');
+  client.subscribe('lights/update');
   // client.subscribe('bedroom/blinds');
 
   // client.subscribe('test/on');

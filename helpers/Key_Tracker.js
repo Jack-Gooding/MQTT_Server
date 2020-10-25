@@ -79,9 +79,9 @@ async function handlePresses(direction, buttonName, actions) {
       button.shortPressTimeout = setTimeout( async () => {
         console.log("Short Press");
         let i = await checkLength(actions, button.count);
-        console.log(actions);
-        console.log(actions[0]);
-        console.log(i);
+        // console.log(actions);
+        // console.log(actions[0]);
+        // console.log(i);
         actions[i].shortPress(button.count-1);
         button.count = 0;
         indicatorLed("Released");

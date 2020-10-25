@@ -13,6 +13,8 @@ const express = express_module();
 const bodyParser = require('body-parser');
 const expressPort = 3254;
 
+const axios = require("axios");
+
 const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({ port: 2700 });
@@ -59,9 +61,9 @@ client.on('message', async (topic, msg) => {
       } else if (message == "button8") {
         keyTracker.handlePresses(true,message,keyBehaviours.switches_on);
       } else if (message == "button3") {
-        client.publish("bedroom/blinds", JSON.stringify({steps: -60000, dir: "down"}));
+        client.publish("bedroom/blinds", JSON.stringify({steps: -95000, dir: "down"}));
       } else if (message == "button7") {
-        client.publish("bedroom/blinds", JSON.stringify({steps: 60000, dir: "up"}));
+        client.publish("bedroom/blinds", JSON.stringify({steps: 95000, dir: "up"}));
       }
     } else {
 
@@ -70,19 +72,33 @@ client.on('message', async (topic, msg) => {
         console.log("Filter On");
         keyTracker.clearTimers();
         ws2812B.layerIndidicator();
+        // client.publish("neopixel/ring/leds", JSON.stringify({red: 0, green: 0, blue: 255}));
+
+
         // custom.setScreenLights("" + Math.round(Math.random()));
         //ws2812B.randomiseColours();
         client.publish("bedroom/blinds", JSON.stringify({steps: 0, dir: "up"}));
       } else if (message == "button2") {
         keyTracker.handlePresses(true,message,keyBehaviours.keyboard_down);
+
+        /* //This is in place to test IFTTT home payload.
+           //Does not trigger IFTTT webhook, but emulates a known payload.
+        const data = {
+            image: { url: 'https://maps.google.com/?q=50.6978488,-3.4834294&z=18' },
+            enteredOrExited: 'exited',
+            occurredAt: 'September 22, 2020 at 01:50PM',
+            user: 'Jack',
+          };
+        axios.post("https://broker.jack-gooding.com/ifttt/status", data)
+          .then(res => console.log(res))
+          .catch(err => console.log(err));
+*/
       } else if (message == "button6") {
         keyTracker.handlePresses(true,message,keyBehaviours.keyboard_up);
       } else if (message == "button3") {
-        let x = client.publish("keypad/leds", ws2812B.allOff());
-
+        keyTracker.handlePresses(true,message,keyBehaviours.leds_off);
       } else if (message == "button7") {
-
-        keyTracker.handlePresses(true,message,keyBehaviours.leds);
+        keyTracker.handlePresses(true,message,keyBehaviours.leds_on);
       } else if (message == "button4") {
         keyTracker.handlePresses(true,message,keyBehaviours.switch_off);
       } else if (message == "button8") {
@@ -123,8 +139,10 @@ client.on('message', async (topic, msg) => {
         keyTracker.handlePresses(false,message,keyBehaviours.light_up);
       } else if (message == "button4") {
         keyTracker.handlePresses(false,message,keyBehaviours.switch_off);
+      } else if (message == "button3") {
+        keyTracker.handlePresses(false,message,keyBehaviours.leds_off);
       } else if (message == "button7") {
-        keyTracker.handlePresses(false,message,keyBehaviours.leds);
+        keyTracker.handlePresses(false,message,keyBehaviours.leds_on);
       } else if (message == "button8") {
         keyTracker.handlePresses(false,message,keyBehaviours.switch_on);
       }
@@ -136,26 +154,44 @@ client.on('message', async (topic, msg) => {
       ws2812B.allOff();
     }
   } else if (topic === "ifttt/home") {
-    if (message === "home") {
+    let msg = JSON.parse(message);
+    if (msg.enteredOrExited === "entered") {
       console.log("HOME, MOTION SENSOR OFF");
-      client.publish("rpi/led", "off");
-
-    } else if (message === "away") {
       client.publish("rpi/led", "on");
+      hueHelpers.toggleLights(true);
+      tpLinkHelpers.toggle(0,true);
+      tpLinkHelpers.toggle(1,true);
+      custom.setScreenLights("255");
+      custom.setRPiLights("255");
+    } else if (msg.enteredOrExited === "exited") {
+      console.log("AWAY FROM HOME, MOTION SENSOR ON");
+      client.publish("rpi/led", "off");
       hueHelpers.toggleLights(false);
       tpLinkHelpers.toggle(0,false);
       tpLinkHelpers.toggle(1,false);
       custom.setScreenLights("0");
       custom.setRPiLights("0");
-      console.log("AWAY FROM HOME, MOTION SENSOR ON");
-    }
+    };
   } else if (topic == 'test/on') {
 
   } else if (topic == 'test/num') {
 
+  } else if (topic == 'lights/request') {
+      hueHelpers.updateLights();
+  } else if (topic == 'lights/update') {// Here begins all broker requests for local data
+    let msg = JSON.parse(message);
+    msg.forEach(light => {
+      if (light.on != null) {
+        hueHelpers.toggleLights(light.on, light.id);
+      };
+      if (light.brightness != null) {
+        hueHelpers.setBrightness(light.brightness, light.id)
+      };
+    });
   } else {
     console.log("unrecognised message: "+message)
   }
+
 });
 
 setInterval(async function() {
@@ -164,8 +200,6 @@ setInterval(async function() {
 },60000);
 tpLinkHelpers.discoverPlugs();
 hueHelpers.prepareHue();
-
-
 
 
 express.use(bodyParser.json());

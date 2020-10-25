@@ -133,11 +133,40 @@ const switches_off = [
 ]
 
 
-const leds = [
+
+const leds_on = [
   {
     shortPress: function() {ws2812B.randomiseColours()},
     longPress: function() {ws2812B.randomiseColours(true)},
-    longerPress: function() {ws2812B.randomiseColours()}
+    longerPress: function() {ws2812B.randomiseColours()},
+  },
+  {
+    shortPress: function() {ws2812B.rainbowRing()},
+    longPress: function() {ws2812B.rainbowRing(true)},
+    longerPress: function() {ws2812B.rainbowRing()},
+  },
+  {
+    shortPress: function() {ws2812B.ringWarm()},
+    longPress: function() {ws2812B.ringWarm()},
+    longerPress: function() {ws2812B.ringWarm()},
+  },
+];
+
+const leds_off = [
+  {
+    shortPress: function() {client.publish("keypad/leds", ws2812B.allOff())},
+    longPress: function() {client.publish("keypad/leds", ws2812B.allOff())},
+    longerPress: function() {client.publish("keypad/leds", ws2812B.allOff())}
+  },
+  {
+    shortPress: function() {ws2812B.ringOff()},
+    longPress: function() {ws2812B.ringOff(true)},
+    longerPress: function() {ws2812B.ringOff()}
+  },
+  {
+    shortPress: function() {ws2812B.ringOff()},
+    longPress: function() {ws2812B.ringOff(true)},
+    longerPress: function() {ws2812B.ringOff()}
   },
 ];
 
@@ -182,7 +211,8 @@ module.exports = {
   switches_off,
   switch_on,
   switch_off,
-  leds,
+  leds_on,
+  leds_off,
   blinds_up,
   blinds_down,
   keyboard_up,

@@ -1,19 +1,8 @@
 const Gpio = require('pigpio').Gpio;
+const gpio_tools = require('./helpers/GPIO_Tools.js');
+
 const mqtt = require('mqtt'); //MQTT protocols
-const ffmpeg = require('fluent-ffmpeg');
-const moment = require('moment');
-const fs = require('fs');
-const path = require('path');
-
-//DS18B20 Temperature Sensor, 1-Wire
-var sensor = require('ds18x20');
-
-
-
 const bodyParser = require('body-parser');
-const expressPort = 3135;
-
-const nodeWebcam = require("node-webcam");
 
 require('dotenv').config();
 const username = process.env.USERN;
@@ -24,66 +13,33 @@ let dateTime = function() {
   return date;
 };
 
-let recordVideo = ffmpeg('/dev/video0').size('100%').duration(15).on('end', function() {
-  camAvailable = true;
-  console.log("Camera Available");
-});
 
 var cameraOpts = {
 
    //Picture related
-
    width: 1280,
-
    height: 720,
-
    quality: 100,
-
-
    //Delay in seconds to take shot
    //if the platform supports miliseconds
    //use a float (0.1)
    //Currently only on windows
-
    delay: 0,
-
-
    //Save shots in memory
-
    saveShots: true,
-
-
    // [jpeg, png] support varies
    // Webcam.OutputTypes
-
    output: "png",
-
-
    //Which camera to use
    //Use Webcam.list() for results
    //false for default device
-
    device: false,
-
-
    // [location, buffer, base64]
    // Webcam.CallbackReturnTypes
    callbackReturn: "location",
-
-
    //Logging
-
    verbose: false
-
 };
-
-
-//Creates webcam instance
-
-var Webcam = nodeWebcam.create( cameraOpts );
-
-
-//Will automatically append location output type
 
 
 const led = new Gpio(5, {mode: Gpio.OUTPUT});
@@ -97,10 +53,36 @@ const fan = new Gpio(23, {mode: Gpio.OUTPUT});
 
 const ledString = new Gpio(25, {mode: Gpio.OUTPUT});
 
+let gpio_items = [
+  {
+    name: "Indicator Led",
+    gpio: new Gpio(5, {mode: Gpio.OUTPUT}),
+    interval: null,
+    value: 0,
+  },
+  {
+    name: "Motion Sensor",
+    gpio: new Gpio(6, {
+      mode: Gpio.INPUT,
+      edge: Gpio.RISING_EDGE
+    }),
+    interval: null,
+    value: 0,
+  },
+  {
+    name: "RPi Fan",
+    gpio: new Gpio(23, {mode: Gpio.OUTPUT}),
+    interval: null,
+    value: 0,
+  },
+  {
+    name: "Led String",
+    gpio: new Gpio(25, {mode: Gpio.OUTPUT}),
+    interval: null,
+    value: 0,
+  },
 
-
-let pulseLedInterval;
-let dutyCycle = 0;
+];
 
 let camActive = false;
 
@@ -119,18 +101,11 @@ motionSensor.on('interrupt', (level) => {
         camAvailable = false;
         console.log("Presence detected 👻👻");
         client.publish("rpi/motion", "detected");
-        recordVideo.output(`${dateTime()}.mp4`).run();
       }
 
     }
   }
 });
-
-
-Webcam.capture( "test_picture", function( err, data ) {
-  console.log(err != null ? err : data);
-} );
-
 
 const client  = mqtt.connect('mqtts://jack-gooding.com', {
     port: 8883,
@@ -174,7 +149,7 @@ client.on('message', async (topic, msg) => {
   } else if (topic === "rpi/capture") {
 
   } else if (topic === "rpi/ledString") {
-    if (message.toInt() > 0) {
+    if (parseInt(message) > 0 && parseInt(message) != null) {
       ledString.digitalWrite(1);
     } else {
       ledString.digitalWrite(0);
@@ -182,51 +157,6 @@ client.on('message', async (topic, msg) => {
   }
 
 });
-
-/*
-
-express.use(bodyParser.json());
-express.use(bodyParser.urlencoded({ extended: true }));
-
-
-express.use((req, res, next) => {
-  res.append('Access-Control-Allow-Origin', ['*']);
-  res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.append('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
-
-
-express.listen(expressPort, () => {
-  console.log("Express server listening on port: " + expressPort);
-});
-
-express.get("/api/cam/capture", async (req, res) => {
-  Webcam.capture( "test_picture", function( err, data ) {
-    // const img = fs.readFileSync('test_picture.png', {encoding: 'base64'});
-    // res.send(img);
-    let options = {
-      root: path.join(__dirname, ''),
-      dotfiles: 'deny',
-      headers: {
-        'x-timestamp': Date.now(),
-        'x-sent': true
-      }
-    };
-
-    res.contentType(data);
-    res.sendFile(`${data}`, options, function(err) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log('Sent!');
-      }
-    });
-  });
-  res.end();
-});
-
-*/
 
 process.on('SIGINT', () => {
   led.pwmWrite(0);

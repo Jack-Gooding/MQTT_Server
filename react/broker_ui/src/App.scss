@@ -1,0 +1,23 @@
+$border-radius: 8px;
+
+.App {
+  padding: 10px;
+  margin: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  background: RGB(20,20,30);
+}
+
+.service-panel-container {
+  margin: 10px;
+  background: rgb(40,40,45);
+  color: white;
+  border-radius: $border-radius;
+  padding: 10px;
+}
+
+.smart-light-card {
+  border-radius: $border-radius;
+  padding: 10px;
+  background: lighten(rgb(40,40,45), 10%);
+}

@@ -1,4 +1,5 @@
 const v3 = require('node-hue-api').v3;
+const {client} = require('./MQTT');
 const LightState = v3.lightStates.LightState;
 let discovery = v3.discovery;
 let hueApi = v3.api;
@@ -27,14 +28,23 @@ async function discoverBridge() {
   }
 }
 
+updateLights = async (newLights) => {
+  if (newLights != null) {
+    lights = newLights;
+  } else {
+    lights = await hueBridge.lights.getAll();
+  }
+  client.publish('broker/lights', JSON.stringify(lights));
+};
 
 prepareHue = async () => {
   hueBridgeLocation = await discoverBridge();
   hueBridge =  await hueApi.createLocal(hueBridgeLocation).connect(username);
-  lights = await hueBridge.lights.getAll();
+  let newLights = await hueBridge.lights.getAll();
+  await updateLights(newLights);
   console.log(`Found ${lights.length} Lights!`);
   return lights;
-}
+};
 
 //prepareHue();
 
@@ -91,6 +101,9 @@ async function randomiseLights(lightId) {
     console.log(`Randomise Promise: `);
     console.log(promise);
     console.log(changes);
+
+    updateLights(); //Request new light data
+
     return changes;
     //console.log(hueApi.lights.getAll());
   } else {
@@ -126,6 +139,9 @@ async function rainbowLoop(transition = 4) {
       clearInterval(rainbowInterval);
     }
     rainbowActive = !rainbowActive;
+
+    updateLights(); //Request new light data
+
     return rainbowActive;
   } else {
     await prepareHue();
@@ -166,6 +182,9 @@ async function discoLights(transition = 2) {
       clearInterval(disco);
     }
     discoActive = !discoActive;
+
+    updateLights(); //Request new light data
+
     return discoActive;
   } else {
      await prepareHue();
@@ -209,10 +228,14 @@ async function getLightStates(lightId) {
     }
   }
   console.log(states);
+
+  updateLights(); //Request new light data
+
   return states;
 }
 
-
+//Intended is true/false
+//ligthId = integer
 async function toggleLights(intended, lightId) {
   console.log(`LightId: ${lightId}`);
 
@@ -228,7 +251,11 @@ async function toggleLights(intended, lightId) {
     if (!intended) {
       state = new LightState().transition(200).off();
     } else {
-      state = new LightState().transition(500).ct(Math.random()*(500-153)+153).on();
+      if (light._data.type == "Extended color light") {
+        state = new LightState().transition(500).ct(Math.random()*(500-153)+153).on();
+      } else {
+        state = new LightState().transition(500).on();
+      }
     }
     promises.push(hueBridge.lights.setLightState(light._data.id, state));
 
@@ -249,6 +276,7 @@ async function toggleLights(intended, lightId) {
         };
   }
   let promise = await Promise.all(promises);
+  updateLights(); //Request new light data
   //console.log(hueApi.lights.getAll());
 } else {
   await prepareHue();
@@ -276,12 +304,13 @@ async function changeLightBrightness(direction, interval, light = null) {
         promises.push(hueBridge.lights.setLightState(light._data.id, state));
         console.log("finally 0")
       } else {
-        console.log("0 reached, idiot");
+        console.log("0 reached");
       }
     }
     promises.push(hueBridge.lights.setLightState(light._data.id, state));
   };
   let promise = await Promise.all(promises);
+  updateLights(); //Request new light data
 };
 
   //changes brightness by {amount}, -254 -> 254
@@ -312,16 +341,50 @@ async function changeBrightness(amount, lightId) {
     };
   };
   let promise = await Promise.all(promises);
+  updateLights(); //Request new light data
+};
+
+//set brightness to a new value 0 -> 254
+async function setBrightness(brightness, lightId) {
+
+let promises = [];
+
+if (lightId > lights.length-1) {
+  lightId = lights.length-1;
+}
+
+if (lightId != null) {
+  let state;
+  let light = lights[lightId];
+
+  state = new LightState().transition(400).bri(brightness);
+
+  promises.push(hueBridge.lights.setLightState(light._data.id, state));
+} else {
+
+  for (let i = 0; i < lights.length; i++ ) {
+    let state;
+    let light = lights[i];
+
+    state = new LightState().transition(400).bri_inc(brightness);
+
+    promises.push(hueBridge.lights.setLightState(light._data.id, state));
+  };
+};
+let promise = await Promise.all(promises);
+updateLights(); //Request new light data
 };
 
 
 module.exports = {
   lights,
+  updateLights,
   discoverBridge,
   prepareHue,
   randomiseLights,
   toggleLights,
   changeBrightness,
+  setBrightness,
   discoLights,
   rainbowLoop,
   getLightStates,

@@ -3,7 +3,7 @@ $border-radius: 8px;
 .App {
   padding: 10px;
   margin: 0;
-  height: 100vh;
+  min-height: 100vh;
   box-sizing: border-box;
   background: RGB(20,20,30);
 }
@@ -19,5 +19,6 @@ $border-radius: 8px;
 .smart-light-card {
   border-radius: $border-radius;
   padding: 10px;
+  margin: 10px;
   background: lighten(rgb(40,40,45), 10%);
 }

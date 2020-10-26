@@ -184,8 +184,8 @@ client.on('message', async (topic, msg) => {
       if (light.on != null) {
         hueHelpers.toggleLights(light.on, light.id);
       };
-      if (light.brightness != null) {
-        hueHelpers.setBrightness(light.brightness, light.id)
+      if (light.color != null) {
+        hueHelpers.setColorValues(light.color, light.id);
       };
     });
   } else {

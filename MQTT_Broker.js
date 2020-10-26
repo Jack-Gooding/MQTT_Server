@@ -7,6 +7,7 @@ const aedes = require('aedes')(); //MQTT Server Host
 const fs = require('fs'); //required for reading SSL/TLS certs.
 const express = require('express'); //Not needed but copying working version.
 const server = express();
+const bodyParser = require('body-parser');
 const cors = require('cors');
 
 require('dotenv').config();
@@ -83,7 +84,7 @@ aedes.authenticate = (client, c_username, c_password, callback)  => {
     console.log("Authentication Success!");
     console.log(`Successful Connection: ${client.id}`);
     console.log(`Total Connections: ${aedes.connectedClients}`);
-    connectedClients.push(device.id);
+    connectedClients.push(client.id);
     console.log(connectedClients);
     reportConnectedClients();
 
@@ -115,7 +116,7 @@ aedes.on('clientReady', async function(device) {
 
 aedes.on('publish', async function(packet, client) {
   console.log('Something Published:');
-  if (client.id != null) {
+  if (client != null) {
     console.log(`Client: ${client.id}`);
   }
   console.log(`Topic: ${packet.topic} - Message: ${packet.payload}`);
@@ -133,6 +134,7 @@ aedes.on('clientDisconnect', async function(device) {
   client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
 });
 
+server.use(cors());
 server.use(bodyParser.json());
 server.listen(expressPort, async () => {
   console.log("Express server listening on port " +expressPort);
@@ -143,7 +145,7 @@ server.get("/", async (req, res) => {
 });
 
 server.get("/lights", async (req, res) => {
-  let res = await client.publish("lights/request");
+  client.publish("lights/request");
   res.send(lights);
 });
 

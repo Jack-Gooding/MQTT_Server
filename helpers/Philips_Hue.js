@@ -16,15 +16,19 @@ let rainbowActive = false;
 const username = "8FNEwdPyoc9eVRxP7ukCnf4QFowMK2aoHOmBuJdi";
 
 async function discoverBridge() {
-  const discoveryResults = await discovery.nupnpSearch();
-
-  if (discoveryResults.length === 0) {
-    console.error('Failed to resolve any Hue Bridges');
-    return null;
-  } else {
-    // Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
-    console.log(`Found ${discoveryResults.length} bridge(s): ${discoveryResults[0].ipaddress}`)
-    return discoveryResults[0].ipaddress;
+  try {
+    const discoveryResults = await discovery.nupnpSearch();
+    if (discoveryResults.length === 0) {
+      console.error('Failed to resolve any Hue Bridges');
+      return null;
+    } else {
+      // Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
+      console.log(`Found ${discoveryResults.length} bridge(s): ${discoveryResults[0].ipaddress}`)
+      return discoveryResults[0].ipaddress;
+    }
+  }
+  catch(e) {
+    console.error(e);
   }
 }
 
@@ -34,16 +38,50 @@ updateLights = async (newLights) => {
   } else {
     lights = await hueBridge.lights.getAll();
   }
-  client.publish('broker/lights', JSON.stringify(lights));
+
+  let lightStates = [];
+
+  for (let i = 0; i < lights.length; i++) {
+    let light = lights[i];
+
+    let lightState = await hueBridge.lights.getLightState(light._data.id);
+
+    let stateObj = {
+      name: light._data.name,
+      id: light._data.id,
+      type: light._data.type,
+      on: lightState.on,
+      reachable: lightState.reachable,
+      color: {
+        bri: lightState.bri,
+      },
+    }
+
+    if (light._data.type === "Extended color light") {
+
+      stateObj.color.hue = lightState.hue;
+      stateObj.color.sat = lightState.sat;
+
+    };
+
+    lightStates.push(stateObj);
+  }
+
+  client.publish('broker/lights', JSON.stringify(lightStates));
 };
 
 prepareHue = async () => {
-  hueBridgeLocation = await discoverBridge();
-  hueBridge =  await hueApi.createLocal(hueBridgeLocation).connect(username);
-  let newLights = await hueBridge.lights.getAll();
-  await updateLights(newLights);
-  console.log(`Found ${lights.length} Lights!`);
-  return lights;
+  try {
+    hueBridgeLocation = await discoverBridge();
+    hueBridge =  await hueApi.createLocal(hueBridgeLocation).connect(username);
+    let newLights = await hueBridge.lights.getAll();
+    await updateLights(newLights);
+    console.log(`Found ${lights.length} Lights!`);
+    return lights;
+  }
+  catch(e) {
+    console.log(e);
+  }
 };
 
 //prepareHue();
@@ -243,11 +281,9 @@ async function toggleLights(intended, lightId) {
 
   let promises = [];
 
-  if (lightId > lights.length-1) {
-    lightId = lights.length-1;
-  }
   if (lightId != null) {
-    light = lights[lightId];
+
+    light = lights.find((light) => light.id = lightId);
     if (!intended) {
       state = new LightState().transition(200).off();
     } else {
@@ -345,7 +381,7 @@ async function changeBrightness(amount, lightId) {
 };
 
 //set brightness to a new value 0 -> 254
-async function setBrightness(brightness, lightId) {
+async function setColorValues(color, lightId) {
 
 let promises = [];
 
@@ -357,7 +393,12 @@ if (lightId != null) {
   let state;
   let light = lights[lightId];
 
-  state = new LightState().transition(400).bri(brightness);
+  state = new LightState().transition(400);
+
+  if (color.hue != null) state.hue(hue);
+  if (color.sat != null) state.sat(sat);
+  if (color.bri != null) state.bri(bri);
+
 
   promises.push(hueBridge.lights.setLightState(light._data.id, state));
 } else {
@@ -366,7 +407,11 @@ if (lightId != null) {
     let state;
     let light = lights[i];
 
-    state = new LightState().transition(400).bri_inc(brightness);
+    state = new LightState().transition(400);
+
+    if (color.hue != null) state.hue(hue);
+    if (color.sat != null) state.sat(sat);
+    if (color.bri != null) state.bri(bri);
 
     promises.push(hueBridge.lights.setLightState(light._data.id, state));
   };
@@ -384,7 +429,7 @@ module.exports = {
   randomiseLights,
   toggleLights,
   changeBrightness,
-  setBrightness,
+  setColorValues,
   discoLights,
   rainbowLoop,
   getLightStates,

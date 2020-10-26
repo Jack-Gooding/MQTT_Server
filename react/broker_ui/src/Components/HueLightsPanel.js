@@ -9,24 +9,28 @@ export default function HueLightsPanel(props) {
   let [lights, setLights] = useState([
     {
       name: "Example",
+      id: 0,
       on: true,
+      color: {bri: 100}
     }
   ]);
 
+  async function fetchData() {
+    try {
+      console.log(`Requesting Data`);
+      let res = await axios.get('https://broker.jack-gooding.com/lights');
+      if (res != null && res.data.length > 0) {
+        console.log(res.data);
+        setLights(res.data);
+      };
+    }
+    catch(e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
     try {
-      async function fetchData() {
-        try {
-          let res = await axios.get('https://broker.jack-gooding.com/lights');
-          if (res) {
-            console.log(res.data);
-            setLights(res.data);
-          };
-        }
-        catch(e) {
-          console.log(e);
-        }
-      };
       fetchData();
     }
     catch(e) {
@@ -39,26 +43,33 @@ export default function HueLightsPanel(props) {
   }, [])
 
   let updateLight = async (data) => {
+
     let newLights = [...lights];
-    newLights[0].on = data.on;
+    let lightIndex = newLights.findIndex((light) => light.id == data.id);
+    if (data.on != null) {
+      newLights[lightIndex].on = data.on;
+      console.log(`Setting ${data.name} to ${data.on ? "On" : "Off"}`);
+    };
+
+    if (data.color != null) {
+      if (data.color.hue != null) newLights[lightIndex].color.hue = data.color.hue;
+      if (data.color.sat != null) newLights[lightIndex].color.sat = data.color.sat;
+      if (data.color.bri != null) newLights[lightIndex].color.bri = data.color.bri;
+      console.log(`Updating ${data.name}'s color.`);
+    };
+
     setLights(newLights);
+
     try {
-      let res = await axios.put('https://broker.jack-gooding.com/lights', [{
-        id: 2,
-        on: Math.round(Math.random()),
-      },
-      {
-        id: 1,
-        on: Math.round(Math.random()),
-      },
-      {
-        id: 3,
-        on: Math.round(Math.random()),
-      },
-      {
-        id: 0,
-        on: Math.round(Math.random()),
-      }]);
+      let payload = [
+        {
+          id: data.id,
+          on: data.on,
+          name: data.name,
+          color: data.color,
+        },
+      ];
+      let res = await axios.put('https://broker.jack-gooding.com/lights', payload);
       console.log(res.data);
     }
     catch(e) {
@@ -69,7 +80,14 @@ export default function HueLightsPanel(props) {
   return (
     <div className="HueLightsPanel">
       Hue Lights
-      <SmartLight data={lights[0]} update={updateLight} />
+      {renderLights(lights, updateLight)}
     </div>
   );
+};
+
+function renderLights(data, update) {
+  const render = data.map((item, index) =>
+    <SmartLight key={index} data={item} update={(e) => update(e)} />
+  );
+  return render;
 };

@@ -283,7 +283,7 @@ async function toggleLights(intended, lightId) {
 
   if (lightId != null) {
 
-    light = lights.find((light) => light.id = lightId);
+    light = lights.find((light) => light.id == lightId);
     if (!intended) {
       state = new LightState().transition(200).off();
     } else {
@@ -354,13 +354,9 @@ async function changeBrightness(amount, lightId) {
 
   let promises = [];
 
-  if (lightId > lights.length-1) {
-    lightId = lights.length-1;
-  }
-
   if (lightId != null) {
     let state;
-    let light = lights[lightId];
+    light = lights.find((light) => light.id == lightId);
 
     state = new LightState().transition(400).bri_inc(amount);
 
@@ -395,9 +391,9 @@ if (lightId != null) {
 
   state = new LightState().transition(400);
 
-  if (color.hue != null) state.hue(hue);
-  if (color.sat != null) state.sat(sat);
-  if (color.bri != null) state.bri(bri);
+  if (color.hue != null) state.hue(color.hue);
+  if (color.sat != null) state.sat(color.sat);
+  if (color.bri != null) state.bri(color.bri);
 
 
   promises.push(hueBridge.lights.setLightState(light._data.id, state));

@@ -14,7 +14,6 @@ export default function WS2812bPanel(props) {
 
     return (
       <div className="WS2812bPanel">
-        WS2812b Ring
       </div>
     );
 };

@@ -5,6 +5,11 @@ export default function ServicePanel(props) {
 
     return (
       <div className="service-panel-container">
+        <div className="service-panel-title">
+          <p>
+            {props.title}
+          </p>
+        </div>
         {props.children}
       </div>
     );

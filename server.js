@@ -178,7 +178,12 @@ client.on('message', async (topic, msg) => {
 
   } else if (topic == 'lights/request') {
       hueHelpers.updateLights();
-  } else if (topic == 'lights/update') {// Here begins all broker requests for local data
+  }
+    //==================================================//
+    // Here begins all broker requests for local data   //
+    //==================================================//
+
+   else if (topic == 'lights/update') {
     let msg = JSON.parse(message);
     msg.forEach(light => {
       if (light.on != null) {
@@ -186,6 +191,13 @@ client.on('message', async (topic, msg) => {
       };
       if (light.color != null) {
         hueHelpers.setColorValues(light.color, light.id);
+      };
+    });
+  } else if (topic == 'plugs/update') {
+    let msg = JSON.parse(message);
+    msg.forEach(plug => {
+      if (plug.on != null) {
+        tpLinkHelpers.toggle(plug.id, plug.on);
       };
     });
   } else {

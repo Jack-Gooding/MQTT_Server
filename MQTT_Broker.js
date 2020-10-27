@@ -17,6 +17,8 @@ const password = process.env.PASS;
 const ssl_key = process.env.KEY;
 const ssl_cert = process.env.CERT;
 
+const ssl_fingerprint = process.env.FINGERPRINT;
+
 // const mqtt_server = require('net').createServer(aedes.handle);
 
 //Key Certs should be used.
@@ -33,6 +35,7 @@ let connectedClients = [];
 
 //Data stores for deviceStates
 let lights = [];
+let plugs = [];
 
 const mqtts_server = require('tls').createServer(options, aedes.handle);
 // const mqtt_server = require('net').createServer(aedes.handle);
@@ -49,6 +52,8 @@ const client  = mqtt.connect('mqtts://jack-gooding.com', {
 client.on('connect', async () => {
   client.subscribe('devices/request');
   client.subscribe('broker/lights');
+  client.subscribe('broker/plugs');
+  client.subscribe('broker/volume');
 });
 
 client.on('message', async (topic, msg) => {
@@ -56,8 +61,14 @@ client.on('message', async (topic, msg) => {
   if (topic === 'devices/request') {
     client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
   } else if (topic === 'broker/lights') {
-    console.log(lights);
     lights = JSON.parse(message);
+    console.log(lights);
+  } else if (topic === 'broker/plugs') {
+    plugs = JSON.parse(message);
+    console.log(plugs);
+  } else if (topic === 'broker/volume') {
+    volume = JSON.parse(message);
+    console.log(volume);
   };
 });
 
@@ -149,9 +160,28 @@ server.get("/lights", async (req, res) => {
   res.send(lights);
 });
 
+server.get("/plugs", async (req, res) => {
+  client.publish("plugs/request");
+  res.send(plugs);
+});
+
 server.put("/lights", async (req, res) => {
-  res.send(req.data);
-  client.publish("lights/update", JSON.stringify(req.data));
+  res.send(req.body);
+  client.publish("lights/update", JSON.stringify(req.body));
+});
+
+server.put("/plugs", async (req, res) => {
+  res.send(req.body);
+  client.publish("plugs/update", JSON.stringify(req.body));
+});
+
+server.put("/desktop/volume", async (req, res) => {
+  res.send(req.body);
+  client.publish("python/volume", JSON.stringify(req.body));
+});
+
+server.get("/inseq/fingerprint", async (req, res) => {
+  res.send(fingerprint)
 });
 
 // receives POST requests from IFTTT when a user enters or exits a specific area.

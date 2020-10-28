@@ -42,7 +42,8 @@ tpLinkClient.on('device-new', async (device) => {
 
 const toggle = async function (id = 0, state = undefined) {
   if (state != null || state != undefined) {
-    plugs[id].setPowerState(state);
+    let plug = plugs.find((plug) => plug.id == id);
+    plug.setPowerState(state);
   } else if (Array.isArray(id)) {
       id.forEach(function(i) {
         plugs[i].togglePowerState();

@@ -7,6 +7,7 @@ const keyBehaviours = require("./helpers/Key_Behaviour");
 const ws2812B = require("./helpers/WS2812B");
 const blinds = require("./helpers/Blinds");
 const custom = require("./helpers/Custom_Devices");
+const ds18x20 = require("./helpers/ds18x20");
 
 const express_module = require('express');
 const express = express_module();
@@ -209,10 +210,12 @@ client.on('message', async (topic, msg) => {
 setInterval(async function() {
   tpLinkHelpers.discoverPlugs();
   hueHelpers.prepareHue();
+  ds18x20.readTemperatures();
 },60000);
+
 tpLinkHelpers.discoverPlugs();
 hueHelpers.prepareHue();
-
+ds18x20.readTemperatures();
 
 express.use(bodyParser.json());
 express.use(bodyParser.urlencoded({ extended: true }));

@@ -6,7 +6,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 export default function ConnectedDevices(props) {
 
   let [devices, setDevices] = useState([
-    {name: "MQTT Broker"}
+    "MQTT Test Device"
   ]);
 
   useEffect(() => {
@@ -19,18 +19,16 @@ export default function ConnectedDevices(props) {
   let fetchData = async () => {
     try {
 
-      let res = await axios.get("https://broker.jack-gooding.com/inseq/fingerprint");
-      if (Array.isArray(res.body)) {
-        setDevices(res.body);
+      let res = await axios.get("https://broker.jack-gooding.com/devices");
+      //This should be changed to an object for better info
+      if (Array.isArray(res.data)) {
+        setDevices(res.data);
       }
 
     }
     catch(e) {
       console.log(e);
     }
-  };
-
-  let handleClick = () => {
   };
 
     return (
@@ -42,9 +40,9 @@ export default function ConnectedDevices(props) {
 
 function renderDevices(data, update) {
   const render = data.map((item, index) =>
-    <div className="mqtt-device-panel">
+    <div key={index} className="mqtt-device-panel">
       <p>
-        {item.name}
+        {item}
       </p>
       <FontAwesomeIcon icon={faInfoCircle}/>
     </div>

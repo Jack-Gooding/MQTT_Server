@@ -356,7 +356,7 @@ async function changeBrightness(amount, lightId) {
 
   if (lightId != null) {
     let state;
-    light = lights.find((light) => light.id == lightId);
+    let light = lights.find((light) => light.id == lightId);
 
     state = new LightState().transition(400).bri_inc(amount);
 
@@ -381,13 +381,9 @@ async function setColorValues(color, lightId) {
 
 let promises = [];
 
-if (lightId > lights.length-1) {
-  lightId = lights.length-1;
-}
-
 if (lightId != null) {
   let state;
-  let light = lights[lightId];
+  let light = lights.find((light) => light.id == lightId);
 
   state = new LightState().transition(400);
 

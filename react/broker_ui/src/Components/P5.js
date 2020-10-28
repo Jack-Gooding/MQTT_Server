@@ -4,46 +4,109 @@ import p5 from 'p5';
 export default function P5(props) {
 
   const sketchRef = useRef(null);
-  const [volume, setVolume] = useState(0);
+
 
   let Sketch = (p) => {
     let cWidth = 200;
-    let cHeight = 120;
+    let cHeight = 200;
 
-    let sliderWidth = cWidth;
-    let sliderHeight = cHeight;
 
+    function getAngleDeg(ax,ay,bx,by) {
+      var angleRad = Math.atan((ay-by)/(ax-bx));
+      var angleDeg = angleRad * 180 / p.TWO_PI;
+
+      return(angleDeg);
+    }
+
+    function getAngleRad(ax,ay,bx,by) {
+      var angleRad = Math.atan((ay-by)/(ax-bx));
+      angleRad+=p.PI/2;
+      if (ax-bx < 0) {
+        angleRad+=p.PI;
+      }
+      angleRad = angleRad;
+      //let a = p.createVector(ax,ay);
+      //let b = p.createVector(bx,by);
+
+      //let angleRad = a.angleBetween(b);
+      //console.log(a,b,angleRad);
+      return(angleRad);
+    }
+
+    let maxSize = Math.sqrt(Math.pow(cWidth,2), Math.pow(cHeight,2));
 
     p.setup = () => {
       p.createCanvas(cWidth,cHeight);
-      for (let i = 0; i < cWidth+cHeight; i+=6) {
-        p.stroke(0);
-        p.strokeWeight(2)
-        p.line(0,i,i,0);
-      }
+      p.strokeCap(p.ROUND);
+      p.strokeJoin(p.ROUND);
+      p.smooth();
       p.noStroke();
       p.beginShape();
       p.endShape();
     }
 
     p.draw = () => {
-      if (p.mouseX <= sliderWidth && p.mouseX >= 0 && p.mouseY >= 0 && p.mouseY <= sliderHeight ) {
-        p.clear();
-        p.fill("yellow");
+      p.clear();
+      p.translate(cWidth/2,cHeight/2);
+      p.stroke('#bbb');
+      p.point(0,0);
+      let sectors = [];
+      //console.log(p.mouseX,p.mouseY);
+
+      //console.log(p.mouseX-cWidth/2,p.mouseX-cHeight/2,Math.atanh(p.mouseX-cWidth/2,p.mouseX-cHeight/2));
+      let mouseAngle = getAngleRad(0,0,cWidth/2-p.mouseX,cHeight/2-p.mouseY);
+
+      p.push();
+      p.noStroke();
+      p.fill("white");
+      p.ellipse(0,0,2*maxSize/2.2+5);
+      p.erase();
+      p.ellipse(0,0,2*maxSize/3-5);
+      p.noErase();
+      p.pop();
+
+      for (let i = 0; i < 24; i++) {
+        let sector = [];
+        let theta1 = p.map(i, 0, 24, 0, p.TWO_PI);
+        let hue = p.map(i, 0, 24, 0, 100);
+        //
+        // let xPos1 = Math.sin(theta1)*maxSize/3;
+        // let yPos1 = Math.cos(theta1)*maxSize/3;
+        // let xPos2 = Math.sin(theta1)*maxSize/4;
+        // let yPos2 = Math.cos(theta1)*maxSize/4;
+        //
+        //
+        // p.point(xPos1,yPos1);
+        // p.line(xPos1,yPos1,xPos2,yPos2);
+        let change = 0;
+        if (mouseAngle > theta1 && mouseAngle < theta1 + p.TWO_PI/24 && p.dist(cWidth/2,cHeight/2,p.mouseX,p.mouseY) < maxSize/2.2 && p.dist(cWidth/2,cHeight/2,p.mouseX,p.mouseY) > maxSize/3) {
+          change = 5;
+          //console.log(mouseAngle, theta1);
+        }
+        p.push();
+        p.noStroke();
+        p.colorMode(p.HSB,100);
+        p.fill(hue,100,100);
+        for (let j = 2; j < 19; j++) {
+          let theta2 = p.map(j, 0, 20, 0, p.TWO_PI);
+          theta2 = theta2/24;
+          sector.push(theta2);
+        };
         p.beginShape();
-        p.vertex(0,cHeight);
-        p.vertex(p.mouseX,cHeight);
-        let volHeight = p.map(p.mouseX, 0, sliderWidth, 0, sliderHeight);
-        p.vertex(p.mouseX,cHeight-volHeight);
-        p.endShape("CLOSE");
-        p.fill("grey");
-        p.beginShape();
-        p.vertex(p.mouseX,cHeight-volHeight);
-        p.vertex(p.mouseX,cHeight);
-        p.vertex(sliderWidth,cHeight);
-        p.vertex(sliderWidth,cHeight-sliderHeight);
-        p.endShape("CLOSE");
-        setVolume(Math.round(p.mouseX/sliderWidth*100));
+        sector.forEach((theta2) => {
+          let xPos1 = Math.cos(theta1+theta2 - p.PI/2)*(maxSize/2.2+change);
+          let yPos1 = Math.sin(theta1+theta2 - p.PI/2)*(maxSize/2.2+change);
+          p.vertex(xPos1, yPos1);
+        });
+        for (let j = sector.length-1; j >= 0; j--) {
+          let theta2 = sector[j];
+          let xPos1 = Math.cos(theta1+theta2 - p.PI/2)*(maxSize/3-change);
+          let yPos1 = Math.sin(theta1+theta2 - p.PI/2)*(maxSize/3-change);
+          p.vertex(xPos1, yPos1);
+        }
+        p.endShape();
+        p.pop();
+
       }
     }
   }
@@ -56,8 +119,7 @@ export default function P5(props) {
   }, [])
 
     return (
-      <div ref={sketchRef}>
-        <p>{volume}</p>
+      <div value={props.value} ref={sketchRef}>
       </div>
     )
 }

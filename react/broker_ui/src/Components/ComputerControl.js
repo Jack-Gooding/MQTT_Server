@@ -1,10 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
-import VolumeSlider from './P5/VolumeSlider';
+
+import VolumePanel from './VolumePanel';
+
 
 export default function ComputerControl(props) {
 
-  let [volume, setVolume] = useState(Math.round(Math.random()*100));
+  let [volume, setVolume] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -15,22 +17,21 @@ export default function ComputerControl(props) {
 
   let fetchData = async () => {
     try {
-
-      let res = await axios.get("https://broker.jack-gooding.com/desktop/");
-      if (Array.isArray(res.body)) {
-        setVolume(res.body.volume);
+      let res = await axios.get("https://broker.jack-gooding.com/desktop/volume");
+      if (res.data.volume != null) {
+        let newVol = Math.round(res.data.volume*100);
+        setVolume(newVol);
       }
-
     }
     catch(e) {
       console.log(e);
     }
   };
 
-  let putNewVolume = async () => {
+  let putNewVolume = async (volume) => {
     try {
-
-      let res = await axios.put("https://broker.jack-gooding.com/desktop/volume", volume);
+      console.log(volume);
+      let res = await axios.put("https://broker.jack-gooding.com/desktop/volume", {volume: volume});
       console.log(res);
     }
     catch(e) {
@@ -38,7 +39,7 @@ export default function ComputerControl(props) {
     }
   };
 
-  let handleVolumeChange = (e, submit) => {
+  let handleVolumeChange = (e) => {
     console.log(`New Volume: ${e}`);
     if (e > 98) {
       e = 100;
@@ -46,32 +47,12 @@ export default function ComputerControl(props) {
       e = 0;
     }
     setVolume(e);
-    if (submit) {
-      //Do axios put request here;;
-      putNewVolume(e);
-    }
+    putNewVolume(e);
   };
 
     return (
       <div className="service-panel">
-        <div className="volume-panel-card panel-card">
-          <p className="panel-title">
-            Volume
-          </p>
-          <VolumeSlider defaultValue={volume} update={(e) => {handleVolumeChange(e)}}/>
-          <p className="panel-value">
-            {volume}%
-          </p>
-        </div>
+        <VolumePanel value={volume} update={(e) => handleVolumeChange(e)}/>
       </div>
     );
-};
-
-function renderDevices(data, update) {
-  const render = data.map((item, index) =>
-    <div className="mqtt-device-panel">
-
-    </div>
-  );
-  return render;
 };

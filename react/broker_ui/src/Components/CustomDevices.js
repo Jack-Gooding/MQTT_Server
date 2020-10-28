@@ -1,10 +1,8 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
-import VolumeSlider from './P5/VolumeSlider';
+import React, {useEffect} from 'react';
+// import axios from 'axios';
 
 export default function ComputerControl(props) {
 
-  let [volume, setVolume] = useState(Math.round(Math.random()*100));
 
   useEffect(() => {
     fetchData();
@@ -16,10 +14,10 @@ export default function ComputerControl(props) {
   let fetchData = async () => {
     try {
 
-      let res = await axios.get("https://broker.jack-gooding.com/desktop/");
-      if (Array.isArray(res.body)) {
-
-      }
+      // let res = await axios.get("https://broker.jack-gooding.com/desktop/");
+      // if (Array.isArray(res.body)) {
+      //
+      // }
 
     }
     catch(e) {
@@ -38,13 +36,4 @@ export default function ComputerControl(props) {
         </div>
       </div>
     );
-};
-
-function renderDevices(data, update) {
-  const render = data.map((item, index) =>
-    <div className="mqtt-device-panel">
-
-    </div>
-  );
-  return render;
 };

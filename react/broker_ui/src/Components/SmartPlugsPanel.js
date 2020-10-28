@@ -11,11 +11,12 @@ export default function HueLightsPanel(props) {
       name: "Example",
       id: 0,
       on: true,
-    },    {
-          name: "Example",
-          id: 0,
-          on: true,
-        }
+    },
+    {
+      name: "Example",
+      id: 1,
+      on: true,
+    }
   ]);
 
   async function fetchData() {
@@ -23,7 +24,6 @@ export default function HueLightsPanel(props) {
       console.log(`Requesting Plug Data`);
       let res = await axios.get('https://broker.jack-gooding.com/plugs');
       if (res != null && res.data.length > 0) {
-        console.log(res.data);
         setPlugs(res.data);
       };
     }

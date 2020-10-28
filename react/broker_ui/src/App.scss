@@ -176,6 +176,7 @@ $border-radius: 8px;
 .mqtt-device-panel {
   background: lighten(rgb(40,40,45), 10%);
   padding: 10px;
+  margin: 10px;
   border-radius: 5px;
   display: flex;
   svg {
@@ -190,6 +191,7 @@ $border-radius: 8px;
 
 .volume-panel-card {
   .sketch-container {
+    min-height: 80px;
     margin: 20px 0;
     display: flex;
     justify-content: center;
@@ -199,7 +201,14 @@ $border-radius: 8px;
     padding: 5px 0;
     border-bottom: solid 1px grey;
   }
+  .loading-icon {
+    min-height: 80px;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+  }
   .panel-value {
+    border-top: solid 1px grey;
     text-align: center;
     padding: 5px 0;
     border-top: solid 1px grey;

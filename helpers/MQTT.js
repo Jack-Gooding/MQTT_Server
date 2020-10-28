@@ -4,13 +4,25 @@ require('dotenv').config();
 const username = process.env.USERN;
 const password = process.env.PASS;
 
-const client  = mqtt.connect('mqtts://jack-gooding.com', {
-    port: 8883,
-    clientId: "Home Server",
-    username: username,
-    password: password
-});
+const client = attemptConnection();
 
+let attemptConnection = () => {
+  try {
+    let client = mqtt.connect('mqtts://jack-gooding.com', {
+      port: 8883,
+      clientId: "Home Server",
+      username: username,
+      password: password
+    });
+    return client;
+  }
+  catch(e) {
+    console.log(e);
+    setTimeout(() => {
+      return attemptConnection();
+    },3000);
+  }
+}
 
 
 

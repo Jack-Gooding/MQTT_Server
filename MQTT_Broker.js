@@ -18,6 +18,7 @@ const ssl_key = process.env.KEY;
 const ssl_cert = process.env.CERT;
 
 const ssl_fingerprint = process.env.FINGERPRINT;
+const authToken = process.env.AUTH_TOKEN;
 
 // const mqtt_server = require('net').createServer(aedes.handle);
 
@@ -36,6 +37,8 @@ let connectedClients = [];
 //Data stores for deviceStates
 let lights = [];
 let plugs = [];
+let volume = 0;
+let temperature = 0;
 
 const mqtts_server = require('tls').createServer(options, aedes.handle);
 // const mqtt_server = require('net').createServer(aedes.handle);
@@ -54,6 +57,7 @@ client.on('connect', async () => {
   client.subscribe('broker/lights');
   client.subscribe('broker/plugs');
   client.subscribe('broker/volume');
+  client.subscribe('broker/temperatures');
 });
 
 client.on('message', async (topic, msg) => {
@@ -62,13 +66,16 @@ client.on('message', async (topic, msg) => {
     client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
   } else if (topic === 'broker/lights') {
     lights = JSON.parse(message);
-    console.log(lights);
+    console.log(`Received lights volume update: ${lights}`);
   } else if (topic === 'broker/plugs') {
     plugs = JSON.parse(message);
-    console.log(plugs);
+    console.log(`Received plugs volume update: ${plugs}`);
   } else if (topic === 'broker/volume') {
     volume = JSON.parse(message);
-    console.log(volume);
+    console.log(`Received PC volume update: ${volume}`);
+  } else if (topic === 'broker/temperatures') {
+    temperature = JSON.parse(message)[0].temp;
+    console.log(`Received temperature reading: ${temperature}`);
   };
 });
 
@@ -155,6 +162,10 @@ server.get("/", async (req, res) => {
   res.send("Test Complete, Broker Activated!");
 });
 
+server.get("/devices", async (req, res) => {
+  res.send(connectedClients);
+});
+
 server.get("/lights", async (req, res) => {
   client.publish("lights/request");
   res.send(lights);
@@ -164,6 +175,7 @@ server.get("/plugs", async (req, res) => {
   client.publish("plugs/request");
   res.send(plugs);
 });
+
 
 server.put("/lights", async (req, res) => {
   res.send(req.body);
@@ -175,13 +187,20 @@ server.put("/plugs", async (req, res) => {
   client.publish("plugs/update", JSON.stringify(req.body));
 });
 
+server.get("/desktop/volume", async (req, res) => {
+  client.publish("volume/request");
+  res.send(volume);
+});
+
 server.put("/desktop/volume", async (req, res) => {
   res.send(req.body);
   client.publish("python/volume", JSON.stringify(req.body));
 });
 
-server.get("/inseq/fingerprint", async (req, res) => {
-  res.send(fingerprint)
+server.post("/fingerprint", async (req, res) => {
+  if (req.body.authToken ==  authToken) {
+    res.send(ssl_fingerprint);
+  }
 });
 
 // receives POST requests from IFTTT when a user enters or exits a specific area.

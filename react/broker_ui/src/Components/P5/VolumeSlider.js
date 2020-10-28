@@ -4,7 +4,10 @@ import p5 from 'p5';
 export default function VolumeSlider(props) {
 
   let [mouseInside, setMouseInside] = useState(false);
-  let volume = props.defaultValue;
+  let [volume, setVolume] = useState(props.value);
+
+  let myP5;
+
   const sketchRef = useRef(null);
 
   let Sketch = (p) => {
@@ -15,6 +18,10 @@ export default function VolumeSlider(props) {
     let sliderMaxHeight = cHeight;
     let sliderMinHeight = 20;
 
+    let firstRun = true;
+    let mouseHeld = false;
+
+
     let checkBoundaries = () => {
       let inside = false;
       let volHeight = p.map(p.mouseX, 0, sliderWidth, sliderMinHeight, sliderMaxHeight);
@@ -24,63 +31,73 @@ export default function VolumeSlider(props) {
       return inside;
     };
 
-    p.setup = () => {
-      p.createCanvas(cWidth,cHeight);
-      p.noStroke();
+    let drawSlider = (x) => {
 
+      let volHeight = p.map(x, 0, sliderWidth, sliderMinHeight, sliderMaxHeight);
+      p.clear();
       p.fill("yellow");
       p.beginShape();
       p.vertex(0,cHeight-sliderMinHeight);
       p.vertex(0,cHeight);
-      let volX = Math.round(volume/100*sliderWidth);
-      let volHeight = p.map(volX, 0, sliderWidth, sliderMinHeight, sliderMaxHeight);
-      p.vertex(volX,cHeight);
-      p.vertex(volX,cHeight-volHeight);
+      p.vertex(x,cHeight);
+      p.vertex(x,cHeight-volHeight);
       p.endShape("CLOSE");
       p.fill("grey");
       p.beginShape();
-      p.vertex(volX,cHeight-volHeight);
-      p.vertex(volX,cHeight);
+      p.vertex(x,cHeight-volHeight);
+      p.vertex(x,cHeight);
       p.vertex(sliderWidth,cHeight);
       p.vertex(sliderWidth,cHeight-sliderMaxHeight);
       p.endShape("CLOSE");
+
+    };
+
+    p.setup = () => {
+      p.createCanvas(cWidth,cHeight);
+      p.noStroke();
+
       p.noLoop();
     }
 
     p.draw = () => {
-      if (checkBoundaries()) {
-        let volHeight = p.map(p.mouseX, 0, sliderWidth, sliderMinHeight, sliderMaxHeight);
-        p.clear();
-        p.fill("yellow");
-        p.beginShape();
-        p.vertex(0,cHeight-sliderMinHeight);
-        p.vertex(0,cHeight);
-        p.vertex(p.mouseX,cHeight);
-        p.vertex(p.mouseX,cHeight-volHeight);
-        p.endShape("CLOSE");
-        p.fill("grey");
-        p.beginShape();
-        p.vertex(p.mouseX,cHeight-volHeight);
-        p.vertex(p.mouseX,cHeight);
-        p.vertex(sliderWidth,cHeight);
-        p.vertex(sliderWidth,cHeight-sliderMaxHeight);
-        p.endShape("CLOSE");
+
+      if (firstRun == false) {
+        drawSlider(p.mouseX);
+        console.log(props.value);
         let newVol = Math.round(p.mouseX/sliderWidth*100);
         volume = newVol;
-        props.update(volume);
+        if (volume > 100) {
+          volume = 100;
+        } else if (volume < 0) {
+          volume = 0;
+        }
+      } else {
+        firstRun = false;
+        console.log(props.value);
+        drawSlider(props.value/100*sliderWidth);
+        console.log("firstRun");
       }
     }
 
     p.mousePressed = () => {
       if (checkBoundaries()) {
         p.loop();
+        mouseHeld = true;
       }
     };
 
-    p.mouseClicked = () => {
-      props.update(volume, true);
+    p.mouseReleased = () => {
+      if (checkBoundaries()) {
+      }
+      if (mouseHeld) {
+        props.update(volume);
+      }
       p.noLoop();
     };
+
+    p.mouseClicked = () => {
+      console.log(props.value);
+    }
 
     p.mouseMoved = () => {
       if (checkBoundaries()) {
@@ -91,7 +108,13 @@ export default function VolumeSlider(props) {
     };
   }
 
+  let createP5 = () => {
+    console.log("render once");
+  };
+
   useEffect(() => {
+    console.log(props.value);
+    setVolume(props.value);
     let myP5 = new p5(Sketch, sketchRef.current);
     return () => {
         console.log("component unmounted");
@@ -99,7 +122,9 @@ export default function VolumeSlider(props) {
   }, [])
 
     return (
-      <div class="sketch-container" style={{"cursor": `${mouseInside ? 'pointer' : ""}`}} ref={sketchRef}>
-      </div>
+      <>
+        <div className="sketch-container" value={props.value} style={{"cursor": `${mouseInside ? 'pointer' : ""}`}} ref={sketchRef}>
+        </div>
+      </>
     )
 }

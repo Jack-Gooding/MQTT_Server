@@ -63,8 +63,8 @@ export default function SmartLight(props) {
   function hsv_to_hsl(h, s, v) {
       // both hsv and hsl values are in [0, 1]
       var l = (2 - s) * v / 2;
-      if (l != 0) {
-          if (l == 1) {
+      if (l !== 0) {
+          if (l === 1) {
               s = 0
           } else if (l < 0.5) {
               s = s * v / (l * 2)
@@ -89,9 +89,9 @@ export default function SmartLight(props) {
       id: props.data.id,
       name: props.data.name,
       color: {
-        hue: (item == "hue") ? val : null,
-        sat: (item == "sat") ? val : null,
-        bri: (item == "bri") ? val : null
+        hue: (item === "hue") ? val : null,
+        sat: (item === "sat") ? val : null,
+        bri: (item === "bri") ? val : null
       }
     });
   };
@@ -99,9 +99,9 @@ export default function SmartLight(props) {
   let updateLightState = (e, item) => {
     let newColor = [...color];
 
-    if (item == "hue") newColor[0] = e.target.value/65534*360
-    if (item == "sat") newColor[1] = (e.target.value-127)/(200-127)*85+15;
-    if (item == "bri") {
+    if (item === "hue") newColor[0] = e.target.value/65534*360
+    if (item === "sat") newColor[1] = (e.target.value-127)/(200-127)*85+15;
+    if (item === "bri") {
 
       let propColor = hsv_to_hsl(newColor[0]/360,newColor[1]/254,e.target.value/254);
       newColor[2] = propColor[2]*100*.6+100*.2;
@@ -143,7 +143,7 @@ export default function SmartLight(props) {
           </button>
         </div>
           <div className="color-sliders">
-            {props.data.type == "Extended color light" ?
+            {props.data.type === "Extended color light" ?
               <>
                 <Slider min="0" max="65534" item="hue" defaultValue={props.data.color.hue} handleChange={e => updateLightState(e, "hue")} handleMouseUp={(e) => changeLightColor(e, "hue")}/>
                 <Slider min="127" max="200" item="sat" defaultValue={props.data.color.sat} handleChange={e => updateLightState(e, "sat")} handleMouseUp={(e) => changeLightColor(e, "sat")}/>

@@ -114,8 +114,25 @@ $border-radius: 8px;
       margin-bottom: 10px;
     }
   }
-};
+}
 
+.anything {
+  max-width: calc((100% / 2) - 20px);
+  min-width: 28em;
+  display: flex;
+  flex-wrap: wrap;
+  & > div {
+    max-width: 50%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    & > div {
+      display: block;
+      width: 100%;
+    }
+  }
+}
 
 .vertical-center {
   display: flex;
@@ -190,7 +207,11 @@ $border-radius: 8px;
 
 
 .volume-panel-card {
+  display: flex;
+  flex-direction: column;
+
   .sketch-container {
+    flex: 1 0 0;
     min-height: 80px;
     margin: 20px 0;
     display: flex;
@@ -201,7 +222,23 @@ $border-radius: 8px;
     padding: 5px 0;
     border-bottom: solid 1px grey;
   }
+  .panel-content {
+    flex-grow: 1 0 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    height: 100%;
+    p {
+      text-align: center;
+      font-size: 3.2em;
+      margin: 0;
+      padding: 0;
+      padding-bottom: .5em;
+    }
+  }
   .loading-icon {
+    flex: 1 0 0;
     min-height: 80px;
     margin: 20px 0;
     display: flex;

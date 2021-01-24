@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 // import axios from 'axios';
 
-export default function ComputerControl(props) {
+export default function CustomDevices(props) {
 
 
   useEffect(() => {
@@ -33,6 +33,11 @@ export default function ComputerControl(props) {
         </div>
         <div className="panel-card">
           3D Printer Lights
+        </div>
+        <div className="panel-card">
+          TODO:
+          Server: - interval update plugstate
+          All: 'ring/warm' is not good.
         </div>
       </div>
     );

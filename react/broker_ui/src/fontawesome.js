@@ -1,4 +1,3 @@
-import ReactDOM from 'react-dom'
 // import the library
 import { library } from '@fortawesome/fontawesome-svg-core';
 

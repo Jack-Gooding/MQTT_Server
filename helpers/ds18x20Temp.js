@@ -22,9 +22,10 @@ let readTemperatures = () => {
       id: thermistor,
       temp: reading,
     }
+    temps.push(temp);
   });
-
-  client.publish(`broker/temperatures`, temps);
+  console.log(temps);
+  client.publish(`broker/temperatures`, JSON.stringify(temps));
   return temps;
 }
 

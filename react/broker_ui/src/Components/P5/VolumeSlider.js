@@ -1,12 +1,10 @@
-import react, {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import p5 from 'p5';
 
 export default function VolumeSlider(props) {
 
   let [mouseInside, setMouseInside] = useState(false);
   let [volume, setVolume] = useState(props.value);
-
-  let myP5;
 
   const sketchRef = useRef(null);
 
@@ -61,7 +59,7 @@ export default function VolumeSlider(props) {
 
     p.draw = () => {
 
-      if (firstRun == false) {
+      if (firstRun === false) {
         drawSlider(p.mouseX);
         console.log(props.value);
         let newVol = Math.round(p.mouseX/sliderWidth*100);
@@ -93,11 +91,8 @@ export default function VolumeSlider(props) {
         props.update(volume);
       }
       p.noLoop();
+      mouseHeld = false;
     };
-
-    p.mouseClicked = () => {
-      console.log(props.value);
-    }
 
     p.mouseMoved = () => {
       if (checkBoundaries()) {

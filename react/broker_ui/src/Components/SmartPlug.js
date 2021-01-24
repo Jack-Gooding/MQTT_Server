@@ -1,14 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
 
-export default function SmartLight(props) {
+export default function SmartPlug(props) {
 
-  let [color, setColor] = useState([
-    49, //hue
-    61, //sat
-    65, //bri
-  ]);
 
   useEffect(() => {
       //loadEffect

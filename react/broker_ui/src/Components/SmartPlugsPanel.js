@@ -48,7 +48,7 @@ export default function HueLightsPanel(props) {
   let updatePlugs = async (data) => {
 
     let newPlugs = [...plugs];
-    let plugIndex = newPlugs.findIndex((plug) => plug.id == data.id);
+    let plugIndex = newPlugs.findIndex((plug) => plug.id === data.id);
     if (data.on != null) {
       newPlugs[plugIndex].on = data.on;
       console.log(`Setting ${data.name} to ${data.on ? "On" : "Off"}`);

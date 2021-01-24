@@ -79,15 +79,19 @@ export default function P5(props) {
         // p.point(xPos1,yPos1);
         // p.line(xPos1,yPos1,xPos2,yPos2);
         let change = 0;
+        let start = 2;
+        let end = 18;
         if (mouseAngle > theta1 && mouseAngle < theta1 + p.TWO_PI/24 && p.dist(cWidth/2,cHeight/2,p.mouseX,p.mouseY) < maxSize/2.2 && p.dist(cWidth/2,cHeight/2,p.mouseX,p.mouseY) > maxSize/3) {
           change = 5;
           //console.log(mouseAngle, theta1);
+          start -=2;
+          end +=2;
         }
         p.push();
         p.noStroke();
         p.colorMode(p.HSB,100);
         p.fill(hue,100,100);
-        for (let j = 2; j < 19; j++) {
+        for (let j = start; j <= end; j++) {
           let theta2 = p.map(j, 0, 20, 0, p.TWO_PI);
           theta2 = theta2/24;
           sector.push(theta2);

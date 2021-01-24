@@ -5,7 +5,7 @@ import ConnectedDevices from './Components/ConnectedDevices';
 import P5Panel from './Components/P5Panel';
 import ComputerControl from './Components/ComputerControl';
 import CustomDevices from './Components/CustomDevices';
-import WS2812bPanel from './Components/WS2812bPanel';
+import WS2812bRingPanel from './Components/WS2812bRingPanel';
 import HueLightsPanel from './Components/HueLightsPanel';
 import SmartPlugsPanel from './Components/SmartPlugsPanel';
 import BlindsPanel from './Components/BlindsPanel';
@@ -26,8 +26,8 @@ export default function App(props) {
       <ServicePanel title="Connected Components">
         <ConnectedDevices/>
       </ServicePanel>
-      <ServicePanel title="P5.js Sketch">
-        <P5Panel/>
+      <ServicePanel title="WS2812b Led Control">
+      <WS2812bRingPanel />
       </ServicePanel>
       <ServicePanel title="Smart Lights">
         <HueLightsPanel />
@@ -44,8 +44,8 @@ export default function App(props) {
       <ServicePanel title="Blinds">
         <BlindsPanel />
       </ServicePanel>
-      <ServicePanel title="WS2812b Ring">
-        <WS2812bPanel />
+      <ServicePanel title="P5.js Sketch">
+      <P5Panel/>
       </ServicePanel>
     </div>
   );

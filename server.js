@@ -7,12 +7,15 @@ const keyBehaviours = require("./helpers/Key_Behaviour");
 const ws2812B = require("./helpers/WS2812B");
 const blinds = require("./helpers/Blinds");
 const custom = require("./helpers/Custom_Devices");
-const ds18x20 = require("./helpers/ds18x20");
+// const ds18x20 = require("./helpers/ds18x20Temp");
 
 const express_module = require('express');
 const express = express_module();
 const bodyParser = require('body-parser');
 const expressPort = 3254;
+
+require('dotenv').config();
+const ssl_fingerprint = process.env.FINGERPRINT;
 
 const axios = require("axios");
 
@@ -179,6 +182,8 @@ client.on('message', async (topic, msg) => {
 
   } else if (topic == 'lights/request') {
       hueHelpers.updateLights();
+  } else if (topic == 'ring/warm') {
+      ws2812B.ringWarm();
   }
     //==================================================//
     // Here begins all broker requests for local data   //
@@ -210,12 +215,12 @@ client.on('message', async (topic, msg) => {
 setInterval(async function() {
   tpLinkHelpers.discoverPlugs();
   hueHelpers.prepareHue();
-  ds18x20.readTemperatures();
+  // ds18x20.readTemperatures();
 },60000);
 
 tpLinkHelpers.discoverPlugs();
 hueHelpers.prepareHue();
-ds18x20.readTemperatures();
+// ds18x20.readTemperatures();
 
 express.use(bodyParser.json());
 express.use(bodyParser.urlencoded({ extended: true }));
@@ -236,6 +241,11 @@ express.get("/", async (req, res) => {
   res.status(200);
   res.send("Thanks, nothing here yet!");
 });
+
+express.get("/fingerprint", async (req, res) => {
+    res.send(ssl_fingerprint);
+});
+
 
 express.get("/api/hue", async (req,res) => {
   res.send(hueHelpers.lights)

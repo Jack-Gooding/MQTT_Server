@@ -4,7 +4,6 @@ require('dotenv').config();
 const username = process.env.USERN;
 const password = process.env.PASS;
 
-const client = attemptConnection();
 
 let attemptConnection = () => {
   try {
@@ -24,6 +23,7 @@ let attemptConnection = () => {
   }
 }
 
+const client = attemptConnection();
 
 
 client.on('connect', () => {
@@ -34,6 +34,9 @@ client.on('connect', () => {
 
   client.subscribe('lights/request');
   client.subscribe('lights/update');
+  client.subscribe('plugs/update');
+  client.subscribe('plugs/request');
+  client.subscribe('temperature/request');
   // client.subscribe('bedroom/blinds');
 
   // client.subscribe('test/on');

@@ -13,7 +13,12 @@ export default function BlindsPanel(props) {
     return (
       <div className="blinds-panel">
         Blinds
+        <button onClick={handleClick}>-1</button>
         <button onClick={handleClick}>+1</button>
+        <button onClick={handleClick}>-5</button>
+        <button onClick={handleClick}>+5</button>
+        <button onClick={handleClick}>-20</button>
+        <button onClick={handleClick}>+20</button>        
       </div>
     );
 };

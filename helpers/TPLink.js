@@ -38,11 +38,36 @@ tpLinkClient.on('device-new', async (device) => {
 
     })
   }
+
+  let payload = [];
+	plugs.forEach((plug) => {
+  	payload.push({
+  		name: plug.alias,
+  		id: plug.deviceId,
+  		on: device.relayState,
+  	});
+  });
+  client.publish("broker/plugs", JSON.stringify(payload));
 });
 
 const toggle = async function (id = 0, state = undefined) {
+
   if (state != null || state != undefined) {
-    let plug = plugs.find((plug) => plug.id == id);
+    if (typeof id === 'number') {
+      let plug;
+
+      //Interface submits the actual ID
+      //server request only submits integer as index
+      if (typeof id === 'number') {
+         if (id > plugs.length-1 || id < 0) {
+           id = 0;
+         }
+         plug = plugs[id];
+       } else {
+         plug = plugs.find((plug) => plug.id == id);
+       }
+
+
     plug.setPowerState(state);
   } else if (Array.isArray(id)) {
       id.forEach(function(i) {
@@ -52,11 +77,11 @@ const toggle = async function (id = 0, state = undefined) {
       plugs[id].togglePowerState();
   };
 };
+};
 
 const discoverPlugs = async function() {
   tpLinkClient.startDiscovery({discoveryTimeout: 5000,});
   console.log(`Found ${plugs.length} plugs: ${plugs.map(function(plug) {return `${plug.name}`})}`);
-  client.publish("broker/plugs", JSON.stringify(plugs));
 };
 
 // discoverPlugs();
@@ -65,4 +90,4 @@ module.exports = {
   plugs,
   toggle,
   discoverPlugs
-}
+};

@@ -2,22 +2,41 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 
 import VolumePanel from './VolumePanel';
+import TemperaturePanel from './TemperaturePanel';
 
 
 export default function ComputerControl(props) {
 
   let [volume, setVolume] = useState(null);
+  let [temperature, setTemperature] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    fetchVolumeData();
+    fetchTemperatureData();
     return () => {
         console.log("component unmounted");
     }
   }, [])
 
-  let fetchData = async () => {
+  let fetchTemperatureData = async () => {
     try {
+      console.log(`Requesting Temperature Data`);
+      let res = await axios.get("https://broker.jack-gooding.com/temperature");
+      console.log(res);
+      if (res.data.temperature != null) {
+        setTemperature(res.data.temperature);
+      }
+    }
+    catch(e) {
+      console.log(e);
+    }
+  };
+
+  let fetchVolumeData = async () => {
+    try {
+      console.log(`Requesting Volume Data`);
       let res = await axios.get("https://broker.jack-gooding.com/desktop/volume");
+      console.log(res);
       if (res.data.volume != null) {
         let newVol = Math.round(res.data.volume*100);
         setVolume(newVol);
@@ -53,6 +72,7 @@ export default function ComputerControl(props) {
     return (
       <div className="service-panel">
         <VolumePanel value={volume} update={(e) => handleVolumeChange(e)}/>
+        <TemperaturePanel value={temperature} />
       </div>
     );
 };

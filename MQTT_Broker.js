@@ -176,6 +176,16 @@ server.get("/plugs", async (req, res) => {
   res.send(plugs);
 });
 
+server.get("/desktop/volume", async (req, res) => {
+  client.publish("volume/request");
+  res.send({volume: volume});
+});
+
+server.get("/temperature", async (req, res) => {
+  client.publish("plugs/request");
+  res.send({temperature: temperature});
+});
+
 
 server.put("/lights", async (req, res) => {
   res.send(req.body);
@@ -187,21 +197,19 @@ server.put("/plugs", async (req, res) => {
   client.publish("plugs/update", JSON.stringify(req.body));
 });
 
-server.get("/desktop/volume", async (req, res) => {
-  client.publish("volume/request");
-  res.send(volume);
-});
 
 server.put("/desktop/volume", async (req, res) => {
   res.send(req.body);
   client.publish("python/volume", JSON.stringify(req.body));
 });
 
-server.post("/fingerprint", async (req, res) => {
-  if (req.body.authToken ==  authToken) {
-    res.send(ssl_fingerprint);
-  }
+server.put("/ws2812b/ring", async (req, res) => {
+  req.body
+  client.publish("/ws2812b/ring");
+  res.send({ring:"warm"});
 });
+
+
 
 // receives POST requests from IFTTT when a user enters or exits a specific area.
 server.post("/ifttt/status", async (req, res) => {

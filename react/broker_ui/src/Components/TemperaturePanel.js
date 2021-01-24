@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import VolumeSlider from './P5/VolumeSlider';
 
-export default function VolumePanel(props) {
+export default function TemperaturePanel(props) {
 
   useEffect(() => {
     return () => {
@@ -14,20 +14,21 @@ export default function VolumePanel(props) {
     return (
         <div className="volume-panel-card panel-card">
           <p className="panel-title">
-            Volume
+            Temperature
           </p>
           {
             (props.value != null)
             ?
-            <VolumeSlider value={props.value} update={(e) => props.update(e)} />
+            <div className="panel-content">
+              <p>
+                {props.value}°C
+              </p>
+            </div>
             :
             <div className="loading-icon">
               <FontAwesomeIcon icon={faSpinner} />
             </div>
           }
-          <p className="panel-value">
-            {props.value != null ? props.value+"%" : "loading..."}
-          </p>
         </div>
     );
 };

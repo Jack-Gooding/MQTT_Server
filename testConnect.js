@@ -1,29 +1,46 @@
 const mqtt = require('mqtt'); //MQTT protocols
-const blinds = require('./helpers/Blinds.js');
-const client  = mqtt.connect('mqtt://jack-gooding.com', {
-    port: 1883,
-    clientId: "Home Server",
-});
+
+require('dotenv').config();
+const username = process.env.USERN;
+const password = process.env.PASS;
+
+let attemptConnection = () => {
+  try {
+    let client = mqtt.connect('mqtts://jack-gooding.com', {
+      port: 8883,
+      clientId: "Test Script",
+      username: username,
+      password: password
+    });
+
+
 
 client.on('connect', async () => {
   client.subscribe('device/connected');
   client.subscribe('clients/connected');
   client.subscribe('keypad/button/pressed');
   client.subscribe('keypad/button/released');
-  client.subscribe('bedroom/blinds');
-
-  client.subscribe('test/on');
-  client.subscribe('test/num');
-  client.subscribe('desk/lights');
-
-  client.subscribe('rpi/motion');
-
-  client.subscribe('ifttt/home');
-  let package = await blinds.setPosition("60000", "down");
-  client.publish('bedroom/blinds', package);
+  console.log('connecttttttttt');
 });
 
 client.on('message', async (topic, msg) => {
   message = msg.toString('utf8');
   console.log(topic, message);
 });
+
+client.on('error', async (error) => {
+  console.log(error);
+});
+
+  return client;
+  }
+  catch(e) {
+    console.log(`Failed to connect to MQTT.`)
+    console.log(e);
+    setTimeout(() => {
+      return attemptConnection();
+    },3000);
+  }
+};
+
+let client = attemptConnection();

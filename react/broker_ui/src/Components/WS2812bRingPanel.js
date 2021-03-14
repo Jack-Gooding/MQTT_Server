@@ -52,6 +52,8 @@ export default function WS2812bRingPanel(props) {
             <button onClick={() => {handleClick()}}>Rainbow Fade</button>
             <button onClick={() => {handleClick()}}>Warm</button>
           </div>
+          <div className="rotation">Rotation speed</div>
+          <Slider min="0" max="65534" item="hue" defaultValue={100} handleChange={e => updateLightState(e, "hue")} handleMouseUp={(e) => changeLightColor(e, "hue")}/>
           <div className="sliders">
             <Slider min="0" max="65534" item="hue" defaultValue={100} handleChange={e => updateLightState(e, "hue")} handleMouseUp={(e) => changeLightColor(e, "hue")}/>
             <Slider min="0" max="65534" item="sat" defaultValue={100} handleChange={e => updateLightState(e, "hue")} handleMouseUp={(e) => changeLightColor(e, "hue")}/>

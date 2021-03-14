@@ -5,6 +5,7 @@ let screenLights = false;
 
 let rpiLights = false;
 
+// 0 = off, 255 = on
 let setScreenLights = async (state) => {
     screenLights = state;
     client.publish('desk/lights', state);

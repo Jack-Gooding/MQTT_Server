@@ -4,6 +4,9 @@
 
 const mqtt = require('mqtt'); //MQTT protocols
 const aedes = require('aedes')(); //MQTT Server Host
+
+const WebSocket = require('ws'); //Websockets for socket
+
 const fs = require('fs'); //required for reading SSL/TLS certs.
 const express = require('express'); //Not needed but copying working version.
 const server = express();
@@ -11,6 +14,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 require('dotenv').config();
+
 const username = process.env.USERN;
 const password = process.env.PASS;
 
@@ -35,10 +39,17 @@ const expressPort = 3256;
 let connectedClients = [];
 
 //Data stores for deviceStates
-let lights = [];
-let plugs = [];
+let sockets = []; // sockets array to track Websocket connections
+
+let lights = []; //Phillips Hue Lights
+let plugs = [    {
+      name: "Example",
+      id: 0,
+      on: true,
+    },]; //TP-Link plugs
 let volume = 0;
 let temperature = 0;
+let deskLights = false;
 
 const mqtts_server = require('tls').createServer(options, aedes.handle);
 // const mqtt_server = require('net').createServer(aedes.handle);
@@ -58,10 +69,18 @@ client.on('connect', async () => {
   client.subscribe('broker/plugs');
   client.subscribe('broker/volume');
   client.subscribe('broker/temperatures');
+
+  client.subscribe('keypad/button/pressed');
+  client.subscribe('keypad/button/released');
+  client.subscribe('desk/lights');
 });
 
 client.on('message', async (topic, msg) => {
   message = msg.toString('utf8');
+
+  //
+  //Broker Instructions
+  //
   if (topic === 'devices/request') {
     client.publish('clients/connected', JSON.stringify({clients: connectedClients}));
   } else if (topic === 'broker/lights') {
@@ -69,7 +88,7 @@ client.on('message', async (topic, msg) => {
     console.log(`Received lights volume update: ${lights}`);
   } else if (topic === 'broker/plugs') {
     plugs = JSON.parse(message);
-    console.log(`Received plugs volume update: ${plugs}`);
+    console.log(`Received plugs update: ${plugs}`);
   } else if (topic === 'broker/volume') {
     volume = JSON.parse(message);
     console.log(`Received PC volume update: ${volume}`);
@@ -77,6 +96,48 @@ client.on('message', async (topic, msg) => {
     temperature = JSON.parse(message)[0].temp;
     console.log(`Received temperature reading: ${temperature}`);
   };
+
+  //
+  //Websocket Instructions
+  //
+  if (topic.split("/")[0] === 'keypad' && topic.split("/")[1] === "button" ) {
+
+    sockets.forEach((socket) => {
+      if (socket.url === "keypad") {
+        if (socket.ws.readyState === WebSocket.OPEN) {
+          socket.ws.send(JSON.stringify(['keypad', {topic, message}]));
+        };
+      };
+    });
+
+  };
+
+  if (topic === "broker/plugs") {
+    console.log("broker/plugs");
+    // console.log(sockets.length);
+    plugs = message;
+    sockets.forEach((socket) => {
+      if (socket.url === "plugs") {
+        if (socket.ws.readyState === WebSocket.OPEN) {
+          socket.ws.send(JSON.stringify(['plugs', {topic, message}]));
+        };
+      };
+    });
+  };
+
+  if (topic === "desk/lights") {
+    console.log("desk/lights");
+    // console.log(sockets.length);
+    deskLights = message;
+    sockets.forEach((socket) => {
+      if (socket.url === "desk/lights") {
+        if (socket.ws.readyState === WebSocket.OPEN) {
+          socket.ws.send(JSON.stringify(['desk/lights', {topic, message}]));
+        };
+      };
+    });
+  };
+
 });
 
 // No longer using unsecured connection.
@@ -173,6 +234,7 @@ server.get("/lights", async (req, res) => {
 
 server.get("/plugs", async (req, res) => {
   client.publish("plugs/request");
+  console.log(plugs)
   res.send(plugs);
 });
 
@@ -204,9 +266,14 @@ server.put("/desktop/volume", async (req, res) => {
 });
 
 server.put("/ws2812b/ring", async (req, res) => {
-  req.body
   client.publish("/ws2812b/ring");
   res.send({ring:"warm"});
+});
+
+server.put("/desk/lights", async (req, res) => {
+  let state = (req.body.value <= 255 || req.body.value == null || !req.body.value) ? 0 : 255;
+
+  client.publish('desk/lights', state);
 });
 
 
@@ -233,4 +300,86 @@ server.post("/ifttt/status", async (req, res) => {
     occurredAt: req.body.occurredAt
   }
   client.publish('ifttt/home', JSON.stringify(mqttPayload));
+});
+
+
+function noop() {}
+function heartbeat() {
+  this.isAlive = true;
+}
+
+const wss = new WebSocket.Server({ port: 3233 });
+
+// wss.on('connection', function connection(ws) {
+//   ws.isAlive = true;
+//   ws.on('pong', heartbeat);
+// });
+
+let connectionsCount = 0;
+
+// wss.on('connection', function connection(ws) {
+//   ws.on('message', function incoming(message) {
+//     console.log('received: %s', message);
+//   });
+//   count++;
+//   ws.send(count);
+// });
+
+
+const interval = setInterval(function ping() {
+
+  let socketsToRemove = [];
+
+  sockets.forEach(function each(socket, index) {
+    if (socket.ws.isAlive === false) {
+      socketsToRemove.push(socket);
+      return socket.ws.terminate()
+    };
+    socket.ws.isAlive = false;
+    socket.ws.ping(noop);
+  });
+
+  socketsToRemove.forEach((item, i) => {
+    socketIndex = sockets.findIndex((socket) => socket == item);
+    sockets.splice(socketIndex, 1);
+  });
+
+  // console.log("sockets.length: " + sockets.length);
+}, 3000);
+
+wss.on('close', function close(ws) {
+  clearInterval(interval);
+
+});
+
+wss.on('connection', function connection(ws, req) {
+  let socket = {ws: ws};
+  socket.ws.isAlive = true;
+  const ip = req.socket.remoteAddress;
+  // console.log(ip);
+  // console.log("url: ", req.url.split("/")[1]);
+  socket.url = req.url.split("/")[1];
+
+  connectionsCount++;
+
+  socket.ws.on('message', function incoming(data) {
+    // wss.clients.forEach(function each(c) {
+    //   if (c.readyState === WebSocket.OPEN) {
+    //     c.send(connectionsCount);
+    //   }
+    // });
+
+    if (data.url === "/plugs" || JSON.parse(data).url === "/plugs") {
+      // console.log(JSON.parse(data));
+      socket.ws.send(JSON.stringify(['plugs', {topic: "broker/plugs", message: plugs}]));
+    }
+    if (data.url === "/desk/lights" || JSON.parse(data).url === "/desk/lights") {
+      // console.log(JSON.parse(data));
+      socket.ws.send(JSON.stringify(['desk/lights', {topic: "desk/lights", message: deskLights}]));
+    }
+  });
+
+  socket.ws.on('pong', heartbeat);
+
+  sockets.push(socket);
 });

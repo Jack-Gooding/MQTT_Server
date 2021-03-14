@@ -8,7 +8,11 @@ import CustomDevices from './Components/CustomDevices';
 import WS2812bRingPanel from './Components/WS2812bRingPanel';
 import HueLightsPanel from './Components/HueLightsPanel';
 import SmartPlugsPanel from './Components/SmartPlugsPanel';
+import SmartPlugsPanelWS from './Components/SmartPlugsPanelWS';
 import BlindsPanel from './Components/BlindsPanel';
+
+import KeyPadButtons from './Components/KeyPadButtons';
+
 
 import './fontawesome.js';
 
@@ -26,14 +30,17 @@ export default function App(props) {
       <ServicePanel title="Connected Components">
         <ConnectedDevices/>
       </ServicePanel>
+      <ServicePanel title="Desk Keypad">
+        <KeyPadButtons/>
+      </ServicePanel>
       <ServicePanel title="WS2812b Led Control">
       <WS2812bRingPanel />
       </ServicePanel>
       <ServicePanel title="Smart Lights">
         <HueLightsPanel />
       </ServicePanel>
-      <ServicePanel title="Smart Plugs">
-        <SmartPlugsPanel />
+      <ServicePanel title="Smart Plugs using Websockets">
+        <SmartPlugsPanelWS />
       </ServicePanel>
       <ServicePanel title="Computer Control">
         <ComputerControl/>
@@ -50,3 +57,8 @@ export default function App(props) {
     </div>
   );
 };
+
+// Replaced by Smart Plugs Websockets
+// <ServicePanel title="Smart Plugs">
+// <SmartPlugsPanel />
+// </ServicePanel>

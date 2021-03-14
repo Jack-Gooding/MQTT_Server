@@ -4,6 +4,8 @@ const {client} = require('./MQTT');
 const tpLinkClient = new Client();
 
 let plugs = [];
+let plugsData = [];
+
 tpLinkClient.on('device-new', async (device) => {
   // let deviceInfo = JSON.stringify(device.getSysInfo());
   // let deviceInfo = device.getSysInfo();
@@ -18,16 +20,13 @@ tpLinkClient.on('device-new', async (device) => {
       console.log(`Duplicate Plug! Host: ${device.host}`);
     }
   });
-  // console.log(deviceInfo);
-  // console.log(device.relayState);
-  // console.log(device.client);
-  // console.log(device.host);
-  // console.log(device.host);
-  // console.log(device.alias);
-  // console.log(device.deviceId);
+
 
   if (!exists) {
     plugs.push(device);
+    plugsData.push({name: device.name, id: device.deviceId, on: device.relayState});
+
+
     console.log(`Found new smart plug!: ${device.alias}`);
     device.on("power-on", function(e) {
       console.log(`${device.name} power on :)`);
@@ -37,6 +36,8 @@ tpLinkClient.on('device-new', async (device) => {
       console.log(`${device.name} power off :(`);
 
     })
+  } else {
+    // cause an error until updates 
   }
 
   let payload = [];
@@ -55,6 +56,7 @@ const toggle = async function (id = 0, state = undefined) {
   if (state != null || state != undefined) {
     if (typeof id === 'number') {
       let plug;
+      let plugDataPlug;
 
       //Interface submits the actual ID
       //server request only submits integer as index
@@ -63,20 +65,43 @@ const toggle = async function (id = 0, state = undefined) {
            id = 0;
          }
          plug = plugs[id];
+         // plugDataPlug = plugsData.find((plug) => plug.id == id);
+         plugDataPlug = plugsData[id];
+
+
+         //Detail why this happens
        } else {
          plug = plugs.find((plug) => plug.id == id);
-       }
+         plugDataPlug = plugsData.find((plug) => plug.id == id);
 
+       };
 
+    console.log(`${plugDataPlug.name}: ${plugDataPlug.on}`);
     plug.setPowerState(state);
+    plugDataPlug.on = state;
+    console.log(`${plugDataPlug.name}: ${plugDataPlug.on}`);
+
+    // console.log(`${plugs[id].name}: ${plugDataPlug[id].relayState}`);
+
   } else if (Array.isArray(id)) {
       id.forEach(function(i) {
+        console.log(`${plugsData[id].name}: ${plugsData[id].on}`);
         plugs[i].togglePowerState();
+        plugsData[id].on = state;
+        console.log(`${plugsData[id].name}: ${plugsData[id].on}`);
+
       })
   } else {
-      plugs[id].togglePowerState();
+
+    plug = plugs.find((plug) => plug.id == id);
+    plug.togglePowerState();
+    plugDataPlug = plugsData.find((plug) => plug.id == id);
+    plugDataPlug.on = state;
+
   };
+  client.publish("broker/plugs", JSON.stringify(plugsData));
 };
+
 };
 
 const discoverPlugs = async function() {

@@ -5,6 +5,7 @@ const username = process.env.USERN;
 const password = process.env.PASS;
 
 
+
 let attemptConnection = () => {
   try {
     let client = mqtt.connect('mqtts://jack-gooding.com', {
@@ -13,6 +14,9 @@ let attemptConnection = () => {
       username: username,
       password: password
     });
+    if (client) {
+	console.log(`connection successful!`);
+}
     return client;
   }
   catch(e) {
@@ -25,7 +29,6 @@ let attemptConnection = () => {
 
 const client = attemptConnection();
 
-
 client.on('connect', () => {
   client.subscribe('device/connected');
   client.subscribe('clients/connected');
@@ -37,6 +40,7 @@ client.on('connect', () => {
   client.subscribe('plugs/update');
   client.subscribe('plugs/request');
   client.subscribe('temperature/request');
+  client.subscribe('ring/warm');
   // client.subscribe('bedroom/blinds');
 
   // client.subscribe('test/on');

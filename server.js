@@ -7,7 +7,8 @@ const keyBehaviours = require("./helpers/Key_Behaviour");
 const ws2812B = require("./helpers/WS2812B");
 const blinds = require("./helpers/Blinds");
 const custom = require("./helpers/Custom_Devices");
-// const ds18x20 = require("./helpers/ds18x20Temp");
+const ds18x20 = require("./helpers/ds18x20");
+const RaspiAHT10 = require("./helpers/RaspiAHT10");
 
 const express_module = require('express');
 const express = express_module();
@@ -49,7 +50,23 @@ client.on('message', async (topic, msg) => {
     console.log(message);
   } else if (topic === 'device/state') {
     deviceState = message;
+  } else if (topic === 'IR/receiver/remote') {
+	if (message == 0x10B92) {
 
+	hueHelpers.toggleLights(false);
+	} else if (message == 0xA0B92) {
+	hueHelpers.randomiseLights()
+	} else if (message == 0x40B92) {
+	hueHelpers.toggleLights(true);
+} else if (message == 0xB92) {
+	console.log(custom.screenLights);
+	custom.screenLights = await custom.setScreenLights(custom.screenLights == "0" ? "255" : "0" );
+}
+else if (message == 0x80B92) {
+tpLinkHelpers.toggle(1,true)
+} else if (message == 0x20B92) {
+tpLinkHelpers.toggle(1,false)
+}
   } else if (topic === 'keypad/button/pressed') {
     if (filterApplied) {
       if (message == "button2") {
@@ -201,6 +218,7 @@ client.on('message', async (topic, msg) => {
     });
   } else if (topic == 'plugs/update') {
     let msg = JSON.parse(message);
+    console.log(msg);
     msg.forEach(plug => {
       if (plug.on != null) {
         tpLinkHelpers.toggle(plug.id, plug.on);
@@ -215,12 +233,14 @@ client.on('message', async (topic, msg) => {
 setInterval(async function() {
   tpLinkHelpers.discoverPlugs();
   hueHelpers.prepareHue();
-  // ds18x20.readTemperatures();
+  ds18x20.readTemperatures();
+  RaspiAHT10.getAHT10Data();
 },60000);
 
 tpLinkHelpers.discoverPlugs();
 hueHelpers.prepareHue();
-// ds18x20.readTemperatures();
+ds18x20.readTemperatures();
+RaspiAHT10.getAHT10Data();
 
 express.use(bodyParser.json());
 express.use(bodyParser.urlencoded({ extended: true }));
@@ -243,9 +263,17 @@ express.get("/", async (req, res) => {
 });
 
 express.get("/fingerprint", async (req, res) => {
+    console.log("/fingerprint");
+    console.log(ssl_fingerprint);
     res.send(ssl_fingerprint);
 });
 
+express.get("/TTGO_BUTTON", async (req, res) => {
+    console.log("/TTGO_BUTTON");
+    //console.log(ssl_fingerprint);
+    res.send(ssl_fingerprint);
+    hueHelpers.toggleLights(Math.round(Math.random()));
+});
 
 express.get("/api/hue", async (req,res) => {
   res.send(hueHelpers.lights)

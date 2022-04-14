@@ -1,4 +1,4 @@
-import react, {useState, useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import p5 from 'p5';
 
 export default function P5(props) {
@@ -11,20 +11,20 @@ export default function P5(props) {
     let cHeight = 200;
 
 
-    function getAngleDeg(ax,ay,bx,by) {
-      var angleRad = Math.atan((ay-by)/(ax-bx));
-      var angleDeg = angleRad * 180 / p.TWO_PI;
-
-      return(angleDeg);
-    }
-
+    // function getAngleDeg(ax,ay,bx,by) {
+    //   var angleRad = Math.atan((ay-by)/(ax-bx));
+    //   var angleDeg = angleRad * 180 / p.TWO_PI;
+    //
+    //   return(angleDeg);
+    // }
+    //
     function getAngleRad(ax,ay,bx,by) {
       var angleRad = Math.atan((ay-by)/(ax-bx));
       angleRad+=p.PI/2;
       if (ax-bx < 0) {
         angleRad+=p.PI;
       }
-      angleRad = angleRad;
+      // angleRad = angleRad;
       //let a = p.createVector(ax,ay);
       //let b = p.createVector(bx,by);
 
@@ -50,7 +50,7 @@ export default function P5(props) {
       p.translate(cWidth/2,cHeight/2);
       p.stroke('#bbb');
       p.point(0,0);
-      let sectors = [];
+      // let sectors = [];
       //console.log(p.mouseX,p.mouseY);
 
       //console.log(p.mouseX-cWidth/2,p.mouseX-cHeight/2,Math.atanh(p.mouseX-cWidth/2,p.mouseX-cHeight/2));
@@ -117,6 +117,7 @@ export default function P5(props) {
 
   useEffect(() => {
     let myP5 = new p5(Sketch, sketchRef.current);
+    myP5.loop = true;
     return () => {
         console.log("component unmounted");
     }

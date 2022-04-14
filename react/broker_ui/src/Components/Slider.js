@@ -11,6 +11,7 @@ export default function Slider(props) {
 
   return (
     <>
+
       <input
         style={{
           background: `linear-gradient(to right, hsl(0,100,50), hsl(360,100,50))`,
@@ -23,7 +24,9 @@ export default function Slider(props) {
         className="slider"
         onChange={(e) => handleOnChange(e)}
         onMouseUp={(e) => props.handleMouseUp(e)}
+        disabled={props.disabled && props.disabled !== null}
       />
+
     </>
   )
 }

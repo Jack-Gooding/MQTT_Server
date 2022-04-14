@@ -22,7 +22,7 @@ export default function SmartPlug(props) {
 
   return (
     <div className="smart-plug-card panel-card">
-      <p>
+      <p className="panel-title">
         {props.data.name}
       </p>
       <button onClick={toggleLightState}>

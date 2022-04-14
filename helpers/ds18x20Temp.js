@@ -20,12 +20,14 @@ let readTemperatures = () => {
     //console.log(`${thermistor}: ${reading}`);
     let temp = {
       id: thermistor,
+      location: 'Raspberry Pi 3B+ Ds18x20',
       temp: reading,
     }
     temps.push(temp);
   });
-  console.log(temps);
+
   client.publish(`broker/temperatures`, JSON.stringify(temps));
+  console.log(temps);
   return temps;
 }
 

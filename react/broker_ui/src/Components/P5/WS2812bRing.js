@@ -1,4 +1,4 @@
-import react, {useState, useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import p5 from 'p5';
 
 export default function WS2812b(props) {
@@ -9,7 +9,7 @@ export default function WS2812b(props) {
     let cWidth = 200;
     let cHeight = 200;
 
-    let numPips = 24;
+    // let numPips = 24;
 
     let maxSize = Math.sqrt(Math.pow(cWidth,2), Math.pow(cHeight,2));
 
@@ -65,7 +65,7 @@ export default function WS2812b(props) {
         p.beginShape();
         // console.log(this.points);
         for (let i = 0; i < this.angles.length; i++) {
-          let activeCheck = (i != 0 && i != this.angles.length-1) || this.active;
+          let activeCheck = (i !== 0 && i !== this.angles.length-1) || this.active;
           if (activeCheck) {
             // let point = this.points[i];
             let angle2 = this.angles[i];
@@ -76,7 +76,7 @@ export default function WS2812b(props) {
           };
         }
         for (let i = this.angles.length-1; i >= 0 ; i--) {
-          let activeCheck = (i != 0 && i != this.angles.length-1) || this.active;
+          let activeCheck = (i !== 0 && i !== this.angles.length-1) || this.active;
           if (activeCheck) {
             let angle2 = this.angles[i];
             let xPos1 = Math.cos(this.angle+angle2 - p.PI/2);
@@ -90,12 +90,12 @@ export default function WS2812b(props) {
       };
     };
 
-    function getAngleDeg(ax,ay,bx,by) {
-      var angleRad = Math.atan((ay-by)/(ax-bx));
-      var angleDeg = angleRad * 180 / p.TWO_PI;
-
-      return(angleDeg);
-    }
+    // function getAngleDeg(ax,ay,bx,by) {
+    //   var angleRad = Math.atan((ay-by)/(ax-bx));
+    //   var angleDeg = angleRad * 180 / p.TWO_PI;
+    //
+    //   return(angleDeg);
+    // }
 
     function getAngleRad(ax,ay,bx,by) {
       var angleRad = Math.atan((ay-by)/(ax-bx));
@@ -103,7 +103,7 @@ export default function WS2812b(props) {
       if (ax-bx < 0) {
         angleRad+=p.PI;
       }
-      angleRad = angleRad;
+
       return(angleRad);
     }
 
@@ -131,7 +131,7 @@ export default function WS2812b(props) {
       for (let i = 0; i < 24; i++) {
 
         let theta1 = p.map(i, 0, 24, 0, p.TWO_PI);
-        let hue = p.map(i, 0, 24, 0, 100);
+        // let hue = p.map(i, 0, 24, 0, 100);
 
         let pip = new Pip(theta1);
         pip.generateAngles();
@@ -152,7 +152,7 @@ export default function WS2812b(props) {
       let ringDrawn = false;
       p.translate(cWidth/2,cHeight/2);
 
-      let activePip = pips.find((a) => {return a.active == true});
+      let activePip = pips.find((a) => {return a.active === true});
 
       if (activePip != null) {
         activePip.active = false;
@@ -193,13 +193,14 @@ export default function WS2812b(props) {
 
   useEffect(() => {
     let myP5 = new p5(Sketch, sketchRef.current);
+    myP5.loop = true;
     return () => {
         console.log("component unmounted");
     }
   }, [])
 
     return (
-      <div value={props.value} ref={sketchRef}>
+      <div className="WS2812b-ring-ui" value={props.value} ref={sketchRef}>
       </div>
     )
 }

@@ -37,7 +37,7 @@ tpLinkClient.on('device-new', async (device) => {
 
     })
   } else {
-    // cause an error until updates 
+    // cause an error until updates
   }
 
   let payload = [];

@@ -12,15 +12,15 @@ export default function HueLightsPanelWS(props) {
       id: 0,
       on: true,
     },
-    {
-      name: "Example",
-      id: 1,
-      on: true,
-    }
+    // {
+    //   name: "Example",
+    //   id: 1,
+    //   on: true,
+    // }
   ]);
 
   useEffect(() => {
-    let ws = new WebSocket('ws://localhost:3233/plugs');
+    let ws = new WebSocket('ws://jack-gooding.com:3234/plugs');
     const subscribe = {
       url: "/plugs",
     };
@@ -32,11 +32,11 @@ export default function HueLightsPanelWS(props) {
     ws.onmessage = (e) => {
 
       const res = JSON.parse(e.data);
-      // console.log("WS plug data received:");
-      // console.log(res);
+      console.log("WS plug data received:");
+      console.log(res);
       if (res[0] === 'plugs') {
-        console.log(res[1].message);
-        let plugs = JSON.parse(res[1].message);
+
+        let plugs = res[1].message;
         setPlugs(plugs);
 
       };
@@ -72,7 +72,7 @@ export default function HueLightsPanelWS(props) {
         },
       ];
       let res = await axios.put('https://broker.jack-gooding.com/plugs', payload);
-      // console.log(res.data);
+      console.log(res.status === 200);
     }
     catch(e) {
       console.error(e);
@@ -88,6 +88,7 @@ export default function HueLightsPanelWS(props) {
 };
 
 function renderPlugs(data, update) {
+  // console.log(data);
   const render = data.map((item, index) =>
     <SmartPlug key={index} data={item} update={(e) => update(e)} />
   );

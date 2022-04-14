@@ -2,35 +2,47 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 
 import VolumePanel from './VolumePanel';
-import TemperaturePanel from './TemperaturePanel';
 
 
 export default function ComputerControl(props) {
 
   let [volume, setVolume] = useState(null);
-  let [temperature, setTemperature] = useState(null);
 
   useEffect(() => {
-    fetchVolumeData();
-    fetchTemperatureData();
+    // fetchVolumeData();
+    let ws = new WebSocket('ws://jack-gooding.com:3234/desktop/volume');
+    const subscribe = {
+      url: "/desktop/volume",
+    };
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify(subscribe));
+    };
+
+    ws.onmessage = (e) => {
+
+      const res = JSON.parse(e.data);
+      console.log("WS volume data received:");
+      console.log(res);
+      if (res[0] === 'desktop/volume') {
+
+        let volume = Math.round(res[1].message*100);
+        setVolume(volume);
+
+      };
+    };
+
+    ws.onclose = () => {
+      ws.close();
+    };
+
     return () => {
-        console.log("component unmounted");
-    }
+      ws.close();
+    };
+
   }, [])
 
-  let fetchTemperatureData = async () => {
-    try {
-      console.log(`Requesting Temperature Data`);
-      let res = await axios.get("https://broker.jack-gooding.com/temperature");
-      console.log(res);
-      if (res.data.temperature != null) {
-        setTemperature(res.data.temperature);
-      }
-    }
-    catch(e) {
-      console.log(e);
-    }
-  };
+
 
   let fetchVolumeData = async () => {
     try {
@@ -72,7 +84,6 @@ export default function ComputerControl(props) {
     return (
       <div className="service-panel">
         <VolumePanel value={volume} update={(e) => handleVolumeChange(e)}/>
-        <TemperaturePanel value={temperature} />
       </div>
     );
 };

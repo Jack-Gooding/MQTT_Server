@@ -1,19 +1,18 @@
 import React, {useState, useEffect} from 'react';
-//import styles from '../css/ScreeningQuestions.scss';
 
 import Buttons from './Buttons';
 
 export default function KeyPadButtons(props) {
-  const [data, setData] = useState([0,0,0,0,0,0,0,0,0]);
+  const [data, setData] = useState([[null,0,0,0,0],[0,0,0,0,0]]);
 
 
   useEffect(() => {
-    let ws = new WebSocket('ws://localhost:3233/keypad');
+    let ws = new WebSocket('ws://jack-gooding.com:3234/keypad');
     const subscribe = {
       event: 'bts:subscribe',
-      data: {
-        channel: `testing123`
-      }
+      // data: {
+      //   channel: `testing123`
+      // }
     };
 
     ws.onopen = () => {
@@ -35,9 +34,25 @@ export default function KeyPadButtons(props) {
           let index = response[1].message.split("")[response[1].message.length-1] - 1;
           let pressed = (topic[2] === "pressed") ? 1 : 0;
 
-          newData[index] = pressed;
+          // console.log(response);
+          // console.log(index);
 
-          setData([...newData]);
+
+          if (index > 4) {
+            newData[0][index-4] = pressed;
+            // console.log(newData);
+          } else {
+            newData[1][index] = pressed;
+            // console.log(newData);
+          }
+          // let rows = [];
+          // rows.push(newData.slice(5,9));
+          // rows.push(newData.slice(0,5));
+          // rows[0].shift(null)
+          // console.log(rows);
+
+          setData([[...newData[0]],[...newData[1]]]);
+
           // setDevices(newData);
         };
       }
@@ -51,7 +66,7 @@ export default function KeyPadButtons(props) {
       ws.close();
     };
 
-  },[]);
+  },[]);// eslint-disable-line react-hooks/exhaustive-deps
 
   //
   // let sendWebsocketMessage = () => {

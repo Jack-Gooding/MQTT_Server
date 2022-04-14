@@ -14,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@sendgrid/mail": "^7.2.6",
-    "aedes": "^0.40.1",
+    "aedes": "^0.42.1",
     "canvas": "^2.6.1",
     "dotenv": "^8.2.0",
     "ds18x20": "^0.2.0",

@@ -7,8 +7,8 @@ const keyBehaviours = require("./helpers/Key_Behaviour");
 const ws2812B = require("./helpers/WS2812B");
 const blinds = require("./helpers/Blinds");
 const custom = require("./helpers/Custom_Devices");
-const ds18x20 = require("./helpers/ds18x20");
-const RaspiAHT10 = require("./helpers/RaspiAHT10");
+const ds18x20 = require("./helpers/ds18x20Temp.js");
+const RaspiAHT10 = require("./helpers/RaspiAHT10Async");
 
 const express_module = require('express');
 const express = express_module();

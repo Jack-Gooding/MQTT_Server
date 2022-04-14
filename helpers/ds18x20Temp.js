@@ -2,18 +2,34 @@
 let sensor = require('ds18x20');
 const {client} = require('./MQTT');
 
+const os = require('os');
+
 let sensors = [];
 
 let obtainSensors = () => {
-  let tempObj = sensor.getAll();
-  sensors = Object.keys(tempObj);
+  // console.log(os.arch());
+  // console.log(os.version());
+
+  if (os.platform() === "linux") {
+    console.log(os.platform());
+
+      console.log(isLoaded);
+      let tempObj = sensor.getAll();
+      sensors = Object.keys(tempObj);
+
+  };
 };
 
 let readTemperatures = () => {
+  let temps = [];
+
+
+  if (os.platform() === "linux") {
+
+
   if (sensors.length == 0 || sensors != null) {
     obtainSensors();
   }
-  let temps = [];
 
   sensors.forEach((thermistor) => {
     let reading = sensor.get(thermistor);
@@ -28,6 +44,8 @@ let readTemperatures = () => {
 
   client.publish(`broker/temperatures`, JSON.stringify(temps));
   console.log(temps);
+  };
+
   return temps;
 }
 

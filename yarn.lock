@@ -126,6 +126,11 @@ async@^2.6.2:
   dependencies:
     lodash "^4.17.14"
 
+async@~0.2.9:
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/async/-/async-0.2.10.tgz#b6bbe0b0674b9d719708ca38de8c237cb526c3d1"
+  integrity sha1-trvgsGdLnXGXCMo43owjfLUmw9E=
+
 axios@^0.19.0:
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.2.tgz#3ea36c5d8818d0d5f8a8a97a6d36b86cdc00cb27"
@@ -485,6 +490,15 @@ dotenv@^8.2.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
   integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
+
+ds18x20@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/ds18x20/-/ds18x20-0.2.0.tgz#0faceab93bfbf2c6670e6077c82a188d8a985941"
+  integrity sha1-D6zquTv78sZnDmB3yCoYjYqYWUE=
+  dependencies:
+    async "~0.2.9"
+    sandal "~1.0.1"
+    sync-exec "~0.5"
 
 duplexer3@^0.1.4:
   version "0.1.4"
@@ -1599,6 +1613,11 @@ safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
+sandal@~1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/sandal/-/sandal-1.0.1.tgz#a933e0b54fb14d2c05fef7389ad559cd7a90d1cf"
+  integrity sha1-qTPgtU+xTSwF/vc4mtVZzXqQ0c8=
+
 save@^2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/save/-/save-2.4.0.tgz#af93ff9b3d7a41d0aff49a23433870613a460f9b"
@@ -1811,6 +1830,11 @@ supports-color@^6.1.0:
   integrity sha512-qe1jfm1Mg7Nq/NSh6XE24gPXROEVsWHxC1LIx//XNlD9iw7YZQGjZNjYN7xGaEG6iKdA8EtNFW6R0gjnVXp+wQ==
   dependencies:
     has-flag "^3.0.0"
+
+sync-exec@~0.5:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/sync-exec/-/sync-exec-0.5.0.tgz#3f7258e4a5ba17245381909fa6a6f6cf506e1661"
+  integrity sha1-P3JY5KW6FyRTgZCfpqb2z1BuFmE=
 
 tar@^4:
   version "4.4.13"
